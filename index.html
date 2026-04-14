@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a472a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nutrition Register">
+<meta name="description" content="MOH Inpatient Nutrition Care Register">
+<title>Inpatient Nutrition Register</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-dark: #1a472a;
+  --green-mid: #2d6a4f;
+  --green-light: #40916c;
+  --green-pale: #d8f3dc;
+  --green-ghost: #f0faf2;
+  --amber: #e9c46a;
+  --amber-dark: #b5850a;
+  --red: #c1121f;
+  --red-pale: #fff0f0;
+  --blue: #023e8a;
+  --blue-pale: #e9f2ff;
+  --text: #1a1a1a;
+  --text-muted: #5a6472;
+  --border: #d0ddd4;
+  --surface: #ffffff;
+  --bg: #f5f7f5;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+body { display: flex; flex-direction: column; }
+
+/* TOP BAR */
+.topbar {
+  background: var(--green-dark);
+  color: white;
+  padding: 0 16px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.topbar-title { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; }
+.topbar-sub { font-size: 10px; opacity: 0.65; margin-top: 1px; font-family: 'IBM Plex Mono', monospace; }
+.offline-badge {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.offline-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+.offline-badge.online .dot { background: #52b788; }
+
+/* MAIN CONTENT */
+.main { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  gap: 4px;
+  border: none;
+  background: none;
+  transition: color 0.15s;
+}
+.nav-item.active { color: var(--green-dark); }
+.nav-item svg { width: 20px; height: 20px; }
+.nav-item .nav-label { font-weight: 500; }
+
+/* PAGES */
+.page { display: none; padding: 16px; }
+.page.active { display: block; }
+
+/* CARDS */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.stat-card.green { background: var(--green-pale); border-color: #b7e4c7; }
+.stat-card.amber { background: #fff8e1; border-color: #ffe082; }
+.stat-card.red { background: var(--red-pale); border-color: #ffcdd2; }
+.stat-num { font-size: 32px; font-weight: 300; font-family: 'IBM Plex Mono', monospace; line-height: 1; }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* FORMS */
+.form-group { margin-bottom: 14px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+label { font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--green-light);
+  box-shadow: 0 0 0 3px rgba(64,145,108,0.12);
+}
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a6472' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+
+/* BUTTONS */
+.btn {
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-primary { background: var(--green-dark); color: white; width: 100%; justify-content: center; }
+.btn-primary:active { background: var(--green-mid); transform: scale(0.98); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-sm { padding: 7px 12px; font-size: 12px; }
+
+/* PATIENT LIST */
+.patient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.patient-item:last-child { border-bottom: none; }
+.patient-item:active { background: var(--green-ghost); margin: 0 -16px; padding: 12px 16px; border-radius: var(--radius); }
+.patient-name { font-weight: 500; font-size: 14px; }
+.patient-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.badge-active { background: var(--green-pale); color: var(--green-dark); }
+.badge-cured { background: var(--blue-pale); color: var(--blue); }
+.badge-rip { background: var(--red-pale); color: var(--red); }
+.badge-default { background: #f5f5f5; color: #666; }
+
+/* SEARCH */
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-wrap input { padding-left: 36px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+/* DAY MONITORING */
+.day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
+.day-tabs::-webkit-scrollbar { display: none; }
+.day-tab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.day-tab.active { background: var(--green-dark); color: white; border-color: var(--green-dark); }
+.day-tab.has-data { border-color: var(--green-light); color: var(--green-dark); }
+
+/* MODAL / DETAIL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green-dark);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty h3 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.empty p { font-size: 13px; line-height: 1.5; }
+
+/* SECTION DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* MONITORING GRID */
+.monitor-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.monitor-row:last-child { border-bottom: none; }
+.monitor-day { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: var(--text-muted); width: 40px; flex-shrink: 0; }
+.monitor-inputs { display: flex; gap: 8px; flex: 1; }
+.monitor-inputs input { font-size: 13px; padding: 8px 10px; }
+
+/* HEADER IN PAGES */
+.page-header { margin-bottom: 16px; }
+.page-header h2 { font-size: 20px; font-weight: 600; }
+.page-header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* DETAIL VIEW */
+.detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--text-muted); }
+.detail-val { font-weight: 500; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+
+/* ADMIT SECTION HEADER */
+.section-header {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  padding: 8px 0 4px;
+  border-bottom: 1px solid var(--green-pale);
+  margin-bottom: 12px;
+}
+
+@media (min-width: 600px) {
+  .main { max-width: 600px; margin: 0 auto; }
+  .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); }
+}
+
+/* PIN LOCK SCREEN */
+.pin-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--green-dark);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  color: white;
+}
+.pin-screen.hidden { display: none; }
+.pin-logo {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+}
+.pin-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+.pin-sub { font-size: 13px; opacity: 0.65; margin-bottom: 40px; text-align: center; }
+.pin-dots {
+  display: flex; gap: 16px; margin-bottom: 40px;
+}
+.pin-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.4);
+  background: transparent;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: white; border-color: white; }
+.pin-dot.error { background: #ff6b6b; border-color: #ff6b6b; }
+.pin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: 12px;
+}
+.pin-key {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  font-size: 22px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.pin-key:active { background: rgba(255,255,255,0.25); transform: scale(0.93); }
+.pin-key.del { font-size: 16px; background: transparent; }
+.pin-key.empty { background: transparent; pointer-events: none; }
+.pin-error-msg { font-size: 13px; color: #ff9999; margin-top: 20px; min-height: 20px; text-align: center; }
+.pin-setup-mode .pin-sub { color: rgba(255,255,255,0.8); }
+.pin-attempts { font-size: 12px; opacity: 0.5; margin-top: 8px; }
+.lock-btn {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.lock-btn:active { background: rgba(255,255,255,0.25); }
+.pin-change-link {
+  margin-top: 24px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Inpatient Nutrition Register</div>
+    <div class="topbar-sub">MOH · SAM Management</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div class="offline-badge" id="conn-badge">
+      <div class="dot"></div>
+      <span id="conn-text">Offline</span>
+    </div>
+    <button class="lock-btn" onclick="lockApp()" title="Lock app">🔒 Lock</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h2>Dashboard</h2>
+      <p id="dash-date">Loading...</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="s-total">0</div>
+        <div class="stat-label">Total admitted</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-num" id="s-active">0</div>
+        <div class="stat-label">Currently admitted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="s-cured">0</div>
+        <div class="stat-label">Cured / discharged</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-num" id="s-rip">0</div>
+        <div class="stat-label">Deceased</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent admissions</div>
+      <div id="recent-list"><div class="empty"><p>No patients yet</p></div></div>
+    </div>
+    <div class="card" style="background:var(--green-ghost); border-color:#b7e4c7;">
+      <div style="font-size:12px; color:var(--green-dark); font-weight:500; margin-bottom:4px;">✓ Works offline</div>
+      <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">All data is saved on this device. No internet needed to use this register.</div>
+    </div>
+  </div>
+
+  <!-- ADMIT -->
+  <div class="page" id="page-admit">
+    <div class="page-header">
+      <h2>Admit patient</h2>
+      <p>New admission to inpatient programme</p>
+    </div>
+    <div class="card">
+      <div class="section-header">Identification</div>
+      <div class="form-group">
+        <label>Unique nutrition reg. number *</label>
+        <input id="a-reg" type="text" placeholder="e.g. 18804e">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Admission date *</label>
+          <input id="a-date" type="date">
+        </div>
+        <div class="form-group">
+          <label>Client name *</label>
+          <input id="a-name" type="text" placeholder="Full name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Physical address / phone</label>
+        <input id="a-phone" type="text" placeholder="Address or phone number">
+      </div>
+
+      <div class="section-header">Demographics</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Age (months)</label>
+          <input id="a-age" type="number" placeholder="e.g. 12" min="0">
+        </div>
+        <div class="form-group">
+          <label>Sex</label>
+          <select id="a-sex">
+            <option value="">Select</option>
+            <option value="F">Female</option>
+            <option value="M">Male</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-header">Programme & clinical</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Food security programme</label>
+          <select id="a-food">
+            <option value="No">No</option>
+            <option value="Yes">Yes (YEISIMO / SFP)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Admission criteria</label>
+          <select id="a-criteria">
+            <option value="2,3">2,3 (WHZ + MUAC)</option>
+            <option value="2">2 — WHZ only</option>
+            <option value="3">3 — MUAC only</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Type of admission</label>
+          <select id="a-type">
+            <option value="1">1 — New</option>
+            <option value="2">2 — Relapse</option>
+            <option value="3">3 — Transfer in (OTP/SFP)</option>
+            <option value="4">4 — Return defaulter</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Serostatus</label>
+          <select id="a-sero">
+            <option value="So">So — Negative</option>
+            <option value="S+">S+ — Positive</option>
+            <option value="Su">Su — Unknown</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>TB status</label>
+        <select id="a-tb">
+          <option value="To">To — Negative</option>
+          <option value="T+">T+ — Positive</option>
+        </select>
+      </div>
+
+      <div class="section-header">Anthropometric measurements</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Height / length (cm)</label>
+          <input id="a-height" type="number" step="0.1" placeholder="e.g. 72.0">
+        </div>
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input id="a-weight" type="number" step="0.01" placeholder="e.g. 6.83">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>WHZ score</label>
+          <select id="a-whz">
+            <option value="<-3SD">&lt; -3SD</option>
+            <option value="-3SD to -2SD">-3SD to -2SD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>MUAC (cm)</label>
+          <input id="a-muac" type="number" step="0.1" placeholder="e.g. 12.4">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="admitPatient()" style="margin-top:8px;">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Admit patient
+      </button>
+    </div>
+  </div>
+
+  <!-- PATIENTS -->
+  <div class="page" id="page-patients">
+    <div class="page-header">
+      <h2>Patient list</h2>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" placeholder="Search by name or reg. number..." oninput="filterPatients(this.value)" id="search-input">
+    </div>
+    <div class="card">
+      <div id="patient-list"><div class="empty"><p>No patients admitted yet</p></div></div>
+    </div>
+  </div>
+
+  <!-- MONITOR -->
+  <div class="page" id="page-monitor">
+    <div class="page-header">
+      <h2>Daily monitoring</h2>
+      <p>Weight & MUAC — Days 1 to 12</p>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Select patient</label>
+        <select id="monitor-patient" onchange="loadMonitor()">
+          <option value="">— select a patient —</option>
+        </select>
+      </div>
+    </div>
+    <div id="monitor-area" style="display:none;">
+      <div class="card">
+        <div class="card-title" id="monitor-name"></div>
+        <div style="display:flex; gap:8px; font-size:11px; color:var(--text-muted); padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:4px;">
+          <span style="width:40px;">Day</span>
+          <span style="flex:1; text-align:center;">Weight (kg)</span>
+          <span style="flex:1; text-align:center;">MUAC (cm)</span>
+        </div>
+        <div id="day-rows"></div>
+        <button class="btn btn-primary" onclick="saveMonitor()" style="margin-top:16px;">Save monitoring data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXIT -->
+  <div class="page" id="page-exit">
+    <div class="page-header">
+      <h2>Exit / discharge</h2>
+      <p>Record outcome when patient leaves</p>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Patient *</label>
+        <select id="exit-patient">
+          <option value="">— select a patient —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Exit date *</label>
+          <input id="e-date" type="date">
+        </div>
+        <div class="form-group">
+          <label>Length of stay (days)</label>
+          <input id="e-los" type="number" placeholder="e.g. 8">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Exit outcome *</label>
+        <select id="e-outcome">
+          <option value="">Select outcome</option>
+          <option value="Cured/Discharged">1 — Cured / Discharged</option>
+          <option value="R.I.P.">2 — Deceased (R.I.P.)</option>
+          <option value="Transfer out">3 — Transfer to another facility</option>
+          <option value="Default">4 — Default (non-respondent)</option>
+          <option value="Referred">5 — Referred</option>
+        </select>
+      </div>
+      <div class="section-header">Discharge measurements</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Weight (kg)</label>
+          <input id="e-weight" type="number" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Height / length (cm)</label>
+          <input id="e-height" type="number" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>WHZ score</label>
+          <input id="e-whz" placeholder="e.g. -2SD">
+        </div>
+        <div class="form-group">
+          <label>MUAC (cm)</label>
+          <input id="e-muac" type="number" step="0.1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Via (next programme)</label>
+        <input id="e-via" placeholder="e.g. OTP, SFP, home">
+      </div>
+      <div class="form-group">
+        <label>Observations / comments</label>
+        <textarea id="e-notes" rows="3" placeholder="Any notes..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="recordExit()">
+        Record exit
+      </button>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="showPage('dashboard', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span class="nav-label">Dashboard</span>
+  </button>
+  <button class="nav-item" onclick="showPage('admit', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/><path d="M19 3v6M16 6h6"/></svg>
+    <span class="nav-label">Admit</span>
+  </button>
+  <button class="nav-item" onclick="showPage('patients', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="nav-label">Patients</span>
+  </button>
+  <button class="nav-item" onclick="showPage('monitor', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span class="nav-label">Monitor</span>
+  </button>
+  <button class="nav-item" onclick="showPage('exit', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <span class="nav-label">Exit</span>
+  </button>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let patients = [];
+
+function loadData() {
+  try { patients = JSON.parse(localStorage.getItem('ncr_v1') || '[]'); } catch(e) { patients = []; }
+}
+
+function saveData() {
+  localStorage.setItem('ncr_v1', JSON.stringify(patients));
+}
+
+function toast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'patients') renderPatientList('');
+  if (name === 'dashboard') updateDashboard();
+  if (name === 'monitor' || name === 'exit') updateDropdowns();
+}
+
+function updateDashboard() {
+  document.getElementById('s-total').textContent = patients.length;
+  document.getElementById('s-active').textContent = patients.filter(p => p.status === 'Active').length;
+  document.getElementById('s-cured').textContent = patients.filter(p => p.status === 'Cured/Discharged').length;
+  document.getElementById('s-rip').textContent = patients.filter(p => p.status === 'R.I.P.').length;
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-KE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  const recent = [...patients].reverse().slice(0, 6);
+  const el = document.getElementById('recent-list');
+  if (!recent.length) { el.innerHTML = '<div class="empty"><p>No patients yet. Tap "Admit" to add one.</p></div>'; return; }
+  el.innerHTML = recent.map(p => patientRowHTML(p)).join('');
+}
+
+function patientRowHTML(p) {
+  const statusClass = p.status === 'Active' ? 'badge-active' : p.status === 'R.I.P.' ? 'badge-rip' : p.status === 'Cured/Discharged' ? 'badge-cured' : 'badge-default';
+  return `<div class="patient-item" onclick="openPatient(${p.id})">
+    <div>
+      <div class="patient-name">${p.name}</div>
+      <div class="patient-meta">${p.reg} · ${p.date} · ${p.age ? p.age + 'm' : '?'} · ${p.sex || '?'}</div>
+    </div>
+    <span class="badge ${statusClass}">${p.status}</span>
+  </div>`;
+}
+
+function renderPatientList(filter) {
+  let list = filter ? patients.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()) || p.reg.toLowerCase().includes(filter.toLowerCase())) : patients;
+  const el = document.getElementById('patient-list');
+  if (!list.length) { el.innerHTML = '<div class="empty"><p>' + (filter ? 'No patients match your search.' : 'No patients admitted yet.') + '</p></div>'; return; }
+  el.innerHTML = [...list].reverse().map(p => patientRowHTML(p)).join('');
+}
+
+function filterPatients(v) { renderPatientList(v); }
+
+function openPatient(id) {
+  const p = patients.find(x => x.id === id);
+  if (!p) return;
+  const statusClass = p.status === 'Active' ? 'badge-active' : p.status === 'R.I.P.' ? 'badge-rip' : p.status === 'Cured/Discharged' ? 'badge-cured' : 'badge-default';
+
+  const monSummary = Object.entries(p.monitoring || {}).filter(([,v]) => v.weight || v.muac).map(([d,v]) => `Day ${d}: ${v.weight ? v.weight+'kg' : ''} ${v.muac ? v.muac+'cm' : ''}`).join(' | ') || '—';
+
+  const html = `
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="modal-title" style="margin:0;">${p.name}</div>
+      <span class="badge ${statusClass}">${p.status}</span>
+    </div>
+    <div class="card-title">Admission details</div>
+    <div class="detail-row"><span class="detail-key">Reg. number</span><span class="detail-val">${p.reg}</span></div>
+    <div class="detail-row"><span class="detail-key">Admission date</span><span class="detail-val">${p.date}</span></div>
+    <div class="detail-row"><span class="detail-key">Age</span><span class="detail-val">${p.age ? p.age + ' months' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Sex</span><span class="detail-val">${p.sex || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Address / phone</span><span class="detail-val">${p.phone || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Serostatus</span><span class="detail-val">${p.sero}</span></div>
+    <div class="detail-row"><span class="detail-key">TB status</span><span class="detail-val">${p.tb}</span></div>
+    <div class="detail-row"><span class="detail-key">Admission type</span><span class="detail-val">${p.type}</span></div>
+    <div class="divider"></div>
+    <div class="card-title">Measurements at admission</div>
+    <div class="detail-row"><span class="detail-key">Height / length</span><span class="detail-val">${p.height ? p.height + ' cm' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Weight</span><span class="detail-val">${p.weight ? p.weight + ' kg' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">WHZ score</span><span class="detail-val">${p.whz}</span></div>
+    <div class="detail-row"><span class="detail-key">MUAC</span><span class="detail-val">${p.muac ? p.muac + ' cm' : '—'}</span></div>
+    <div class="divider"></div>
+    <div class="card-title">Daily monitoring</div>
+    <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">${monSummary}</div>
+    ${p.exit ? `<div class="divider"></div><div class="card-title">Exit details</div>
+    <div class="detail-row"><span class="detail-key">Exit date</span><span class="detail-val">${p.exit.date}</span></div>
+    <div class="detail-row"><span class="detail-key">Outcome</span><span class="detail-val">${p.exit.outcome}</span></div>
+    <div class="detail-row"><span class="detail-key">Length of stay</span><span class="detail-val">${p.exit.los ? p.exit.los + ' days' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Discharge weight</span><span class="detail-val">${p.exit.weight ? p.exit.weight + ' kg' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Discharge MUAC</span><span class="detail-val">${p.exit.muac ? p.exit.muac + ' cm' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Via</span><span class="detail-val">${p.exit.via || '—'}</span></div>` : ''}
+    <button class="btn btn-secondary" style="margin-top:20px; width:100%;" onclick="closeModal()">Close</button>
+  `;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function admitPatient() {
+  const reg = document.getElementById('a-reg').value.trim();
+  const name = document.getElementById('a-name').value.trim();
+  const date = document.getElementById('a-date').value;
+  if (!reg || !name || !date) { toast('Please fill in Reg. number, Name, and Date.'); return; }
+  const p = {
+    id: Date.now(),
+    reg, name, date,
+    phone: document.getElementById('a-phone').value,
+    age: document.getElementById('a-age').value,
+    sex: document.getElementById('a-sex').value,
+    food: document.getElementById('a-food').value,
+    criteria: document.getElementById('a-criteria').value,
+    type: document.getElementById('a-type').value,
+    sero: document.getElementById('a-sero').value,
+    tb: document.getElementById('a-tb').value,
+    height: document.getElementById('a-height').value,
+    weight: document.getElementById('a-weight').value,
+    whz: document.getElementById('a-whz').value,
+    muac: document.getElementById('a-muac').value,
+    monitoring: {},
+    status: 'Active',
+    exit: null
+  };
+  patients.push(p);
+  saveData();
+  toast('✓ Patient admitted successfully');
+  ['a-reg','a-name','a-phone','a-age','a-height','a-weight','a-muac'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('a-date').value = new Date().toISOString().slice(0,10);
+  ['a-sex','a-food','a-criteria','a-type','a-sero','a-tb','a-whz'].forEach(id => document.getElementById(id).selectedIndex = 0);
+}
+
+function updateDropdowns() {
+  const active = patients.filter(p => p.status === 'Active');
+  const opts = '<option value="">— select a patient —</option>' + active.map(p => `<option value="${p.id}">${p.name} (${p.reg})</option>`).join('');
+  document.getElementById('monitor-patient').innerHTML = opts;
+  document.getElementById('exit-patient').innerHTML = '<option value="">— select a patient —</option>' + patients.map(p => `<option value="${p.id}">${p.name} (${p.reg}) — ${p.status}</option>`).join('');
+}
+
+function loadMonitor() {
+  const id = parseInt(document.getElementById('monitor-patient').value);
+  const p = patients.find(x => x.id === id);
+  const area = document.getElementById('monitor-area');
+  if (!p) { area.style.display = 'none'; return; }
+  area.style.display = 'block';
+  document.getElementById('monitor-name').textContent = p.name + ' — ' + p.reg;
+  const rows = document.getElementById('day-rows');
+  rows.innerHTML = Array.from({length:12}, (_,i) => {
+    const d = i + 1;
+    const m = p.monitoring[d] || {};
+    return `<div class="monitor-row">
+      <span class="monitor-day">D${d}</span>
+      <div class="monitor-inputs">
+        <input type="number" step="0.01" placeholder="Weight" value="${m.weight || ''}" onchange="setMonitor(${id},${d},'weight',this.value)">
+        <input type="number" step="0.1" placeholder="MUAC" value="${m.muac || ''}" onchange="setMonitor(${id},${d},'muac',this.value)">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setMonitor(pid, day, field, value) {
+  const p = patients.find(x => x.id === pid);
+  if (!p) return;
+  if (!p.monitoring[day]) p.monitoring[day] = {};
+  p.monitoring[day][field] = value;
+}
+
+function saveMonitor() {
+  saveData();
+  toast('✓ Monitoring data saved');
+}
+
+function recordExit() {
+  const id = parseInt(document.getElementById('exit-patient').value);
+  const outcome = document.getElementById('e-outcome').value;
+  const date = document.getElementById('e-date').value;
+  if (!id || !outcome || !date) { toast('Please select a patient, date, and outcome.'); return; }
+  const p = patients.find(x => x.id === id);
+  if (!p) return;
+  p.status = outcome;
+  p.exit = {
+    date, outcome,
+    los: document.getElementById('e-los').value,
+    weight: document.getElementById('e-weight').value,
+    height: document.getElementById('e-height').value,
+    whz: document.getElementById('e-whz').value,
+    muac: document.getElementById('e-muac').value,
+    via: document.getElementById('e-via').value,
+    notes: document.getElementById('e-notes').value
+  };
+  saveData();
+  toast('✓ Exit recorded');
+  ['e-date','e-los','e-weight','e-height','e-whz','e-muac','e-via'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('e-notes').value = '';
+  document.getElementById('e-outcome').selectedIndex = 0;
+  document.getElementById('exit-patient').selectedIndex = 0;
+}
+
+function updateConnStatus() {
+  const badge = document.getElementById('conn-badge');
+  const text = document.getElementById('conn-text');
+  if (navigator.onLine) { badge.classList.add('online'); text.textContent = 'Online'; }
+  else { badge.classList.remove('online'); text.textContent = 'Offline'; }
+}
+
+window.addEventListener('online', updateConnStatus);
+window.addEventListener('offline', updateConnStatus);
+
+loadData();
+updateDashboard();
+updateConnStatus();
+document.getElementById('a-date').value = new Date().toISOString().slice(0,10);
+document.getElementById('e-date').value = new Date().toISOString().slice(0,10);
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ── PIN SECURITY ──────────────────────────────────────────
+const PIN_KEY = 'ncr_pin';
+const LOCK_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const MAX_ATTEMPTS = 5;
+
+let pinBuffer = '';
+let pinMode = 'unlock'; // 'unlock' | 'setup' | 'change-old' | 'change-new' | 'change-confirm'
+let newPinTemp = '';
+let attempts = 0;
+let lockTimer = null;
+let lockedUntil = 0;
+
+function getPin() { return localStorage.getItem(PIN_KEY) || null; }
+function setPin(p) { localStorage.setItem(PIN_KEY, p); }
+
+function initPin() {
+  if (!getPin()) {
+    pinMode = 'setup';
+    document.getElementById('pin-title').textContent = 'Create your PIN';
+    document.getElementById('pin-sub').textContent = 'Choose a 4-digit PIN to protect patient data';
+    document.getElementById('pin-change-link').style.display = 'none';
+  } else {
+    pinMode = 'unlock';
+    document.getElementById('pin-title').textContent = 'Enter PIN';
+    document.getElementById('pin-sub').textContent = 'MOH Inpatient Nutrition Register';
+    document.getElementById('pin-change-link').style.display = 'block';
+  }
+  document.getElementById('pin-screen').classList.remove('hidden');
+  pinBuffer = '';
+  renderDots();
+}
+
+function renderDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d' + i);
+    d.classList.remove('filled', 'error');
+    if (i < pinBuffer.length) d.classList.add('filled');
+  }
+}
+
+function pinKey(k) {
+  if (Date.now() < lockedUntil) return;
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  renderDots();
+  document.getElementById('pin-error').textContent = '';
+  if (pinBuffer.length === 4) setTimeout(handlePin, 120);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  renderDots();
+}
+
+function handlePin() {
+  if (pinMode === 'setup') {
+    newPinTemp = pinBuffer;
+    pinBuffer = '';
+    pinMode = 'setup-confirm';
+    document.getElementById('pin-title').textContent = 'Confirm PIN';
+    document.getElementById('pin-sub').textContent = 'Enter the same PIN again';
+    renderDots();
+    return;
+  }
+  if (pinMode === 'setup-confirm') {
+    if (pinBuffer === newPinTemp) {
+      setPin(pinBuffer);
+      unlockApp();
+      toast('✓ PIN set successfully');
+    } else {
+      showPinError('PINs do not match. Try again.');
+      pinMode = 'setup';
+      newPinTemp = '';
+      document.getElementById('pin-title').textContent = 'Create your PIN';
+      document.getElementById('pin-sub').textContent = 'Choose a 4-digit PIN to protect patient data';
+    }
+    return;
+  }
+  if (pinMode === 'change-old') {
+    if (pinBuffer === getPin()) {
+      pinBuffer = '';
+      pinMode = 'change-new';
+      document.getElementById('pin-title').textContent = 'New PIN';
+      document.getElementById('pin-sub').textContent = 'Choose your new 4-digit PIN';
+      renderDots();
+    } else {
+      showPinError('Incorrect PIN.');
+    }
+    return;
+  }
+  if (pinMode === 'change-new') {
+    newPinTemp = pinBuffer;
+    pinBuffer = '';
+    pinMode = 'change-confirm';
+    document.getElementById('pin-title').textContent = 'Confirm new PIN';
+    document.getElementById('pin-sub').textContent = 'Enter the new PIN again';
+    renderDots();
+    return;
+  }
+  if (pinMode === 'change-confirm') {
+    if (pinBuffer === newPinTemp) {
+      setPin(pinBuffer);
+      unlockApp();
+      toast('✓ PIN changed successfully');
+    } else {
+      showPinError('PINs do not match. Try again.');
+      pinMode = 'change-new';
+      newPinTemp = '';
+      document.getElementById('pin-title').textContent = 'New PIN';
+      document.getElementById('pin-sub').textContent = 'Choose your new 4-digit PIN';
+    }
+    return;
+  }
+  // unlock mode
+  if (pinBuffer === getPin()) {
+    attempts = 0;
+    document.getElementById('pin-attempts').textContent = '';
+    unlockApp();
+  } else {
+    attempts++;
+    const remaining = MAX_ATTEMPTS - attempts;
+    if (attempts >= MAX_ATTEMPTS) {
+      lockedUntil = Date.now() + 30000;
+      showPinError('Too many attempts. Locked for 30 seconds.');
+      attempts = 0;
+      setTimeout(() => {
+        document.getElementById('pin-error').textContent = '';
+        document.getElementById('pin-attempts').textContent = '';
+      }, 30000);
+    } else {
+      showPinError('Incorrect PIN. ' + remaining + ' attempt' + (remaining === 1 ? '' : 's') + ' left.');
+    }
+  }
+}
+
+function showPinError(msg) {
+  pinBuffer = '';
+  renderDots();
+  document.getElementById('pin-error').textContent = msg;
+  for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.add('error');
+  setTimeout(() => { for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.remove('error'); }, 500);
+}
+
+function unlockApp() {
+  document.getElementById('pin-screen').classList.add('hidden');
+  pinBuffer = '';
+  resetLockTimer();
+}
+
+function lockApp() {
+  clearTimeout(lockTimer);
+  pinBuffer = '';
+  pinMode = 'unlock';
+  document.getElementById('pin-title').textContent = 'Enter PIN';
+  document.getElementById('pin-sub').textContent = 'MOH Inpatient Nutrition Register';
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-change-link').style.display = 'block';
+  renderDots();
+  document.getElementById('pin-screen').classList.remove('hidden');
+}
+
+function resetLockTimer() {
+  clearTimeout(lockTimer);
+  lockTimer = setTimeout(lockApp, LOCK_TIMEOUT);
+}
+
+function startChangePin() {
+  pinBuffer = '';
+  pinMode = 'change-old';
+  document.getElementById('pin-title').textContent = 'Enter current PIN';
+  document.getElementById('pin-sub').textContent = 'Verify your identity to change PIN';
+  document.getElementById('pin-change-link').style.display = 'none';
+  document.getElementById('pin-error').textContent = '';
+  renderDots();
+}
+
+// Reset timer on any user interaction
+['touchstart','mousedown','keydown'].forEach(ev =>
+  document.addEventListener(ev, () => { if (document.getElementById('pin-screen').classList.contains('hidden')) resetLockTimer(); }, { passive: true })
+);
+
+// Lock when app goes to background
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearTimeout(lockTimer);
+  } else {
+    if (!document.getElementById('pin-screen').classList.contains('hidden')) return;
+    // re-lock if was hidden for more than 1 min
+    lockApp();
+  }
+});
+
+initPin();
+</script>
+
+<!-- PIN LOCK SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-logo">
+    <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  </div>
+  <div class="pin-title" id="pin-title">Enter PIN</div>
+  <div class="pin-sub" id="pin-sub">MOH Inpatient Nutrition Register</div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-error-msg" id="pin-error"></div>
+  <div class="pin-attempts" id="pin-attempts"></div>
+  <button class="pin-change-link" id="pin-change-link" onclick="startChangePin()" style="display:none;">Change PIN</button>
+</div>
+
+<!-- PATIENT DETAIL MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet" id="modal-content"></div>
+</div>
+
+</body>
+</html>
