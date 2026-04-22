@@ -249,15 +249,17 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="fg"><label>Weight (kg)</label><input id="a-weight" type="number" step="0.01" placeholder="e.g. 6.83" oninput="calcAdmWhz()"></div>
     </div>
     <div class="fr">
-      <div class="fg"><label>Sex (for WHZ)</label>
-        <select id="a-sex2" onchange="calcAdmWhz()"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select>
+      <div class="fg"><label>WHZ / WLZ score</label>
+        <select id="a-whz">
+          <option value="<-3SD">&lt; -3SD (SAM)</option>
+          <option value="-3SD to -2SD">-3SD to -2SD (MAM)</option>
+          <option value=">-2SD">&gt; -2SD (Normal)</option>
+        </select>
       </div>
-      <div class="fg"><label>MUAC (cm)</label><input id="a-muac" type="number" step="0.1" placeholder="e.g. 12.4" oninput="classifyMuac()"></div>
+      <div class="fg"><label>MUAC (cm)</label><input id="a-muac" type="number" step="0.1" placeholder="e.g. 12.4" oninput="classifyMUAC();calcAdmWhz()"></div>
     </div>
-    <div class="fr">
-      <div class="fg"><label>WHZ score (auto-calculated)</label><input id="a-whz" readonly placeholder="Enter height + weight + sex"></div>
-      <div class="fg"><label>WHZ classification (auto)</label><input id="a-whz-class" readonly placeholder="Auto"></div>
-    </div>
+    <div id="whz-auto" style="display:none;margin-bottom:8px;font-size:12px;padding:8px 12px;border-radius:var(--r);background:var(--gg);border:1px solid #b7e4c7"></div>
+    <div id="muac-class" style="display:none;margin-bottom:12px;font-size:12px;padding:6px 10px;border-radius:var(--r)"></div>
     <div id="whz-calc-info" class="gbox" style="display:none;margin-top:-8px;margin-bottom:12px;font-size:12px"></div>
 
     <div class="sh">Clinical at admission</div>
@@ -280,10 +282,16 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <textarea id="a-diag" rows="2" placeholder="e.g. SAM with oedema grade ++, pneumonia, started gentamicin + penicillin..."></textarea>
     </div>
 
-    <button class="btn bp" onclick="admitPatient()" style="margin-top:8px" id="admit-btn">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-      <span id="admit-btn-txt">Admit patient</span>
-    </button>
+    <div id="edit-banner" style="display:none;background:var(--op);border:1px solid #f4a261;border-radius:var(--r);padding:10px 12px;margin-top:8px;margin-bottom:8px;font-size:12px;color:#c05621">
+      ✏️ <strong>Editing existing patient</strong> — changes will update the record. Click "Save changes" to confirm.
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn bp" onclick="admitPatient()" style="flex:2" id="admit-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="admit-btn-txt">Admit patient</span>
+      </button>
+      <button class="btn bs" onclick="cancelEdit()" id="cancel-edit-btn" style="display:none;flex:1">Cancel edit</button>
+    </div>
   </div>
 </div>
 
@@ -588,19 +596,19 @@ function classifyMUAC(){
   const muac=parseFloat(document.getElementById('a-muac')?.value)||0;
   const el=document.getElementById('muac-class');if(!el)return;
   if(!muac){el.style.display='none';return}
-  let cls='';let bg='';let txt='';
+  let cls,bg,txt;
   if(age<6){
-    if(muac<11.0){cls='SAM criteria';bg='var(--rp)';txt='var(--rd)'}
+    if(muac<11.0){cls='At risk of poor growth (<11.0cm)';bg='var(--rp)';txt='var(--rd)'}
     else{cls='Normal (≥11.0cm)';bg='var(--gp)';txt='var(--gd)'}
   } else {
     if(muac<11.5){cls='SAM — <11.5cm';bg='var(--rp)';txt='var(--rd)'}
-    else if(muac<=12.5){cls='MAM — 11.5–12.5cm';bg:'#fff8e1';txt='#b5850a'}
-    else if(muac<=13.5){cls='At risk — 12.5–13.5cm';bg:'var(--op)';txt='var(--or)'}
-    else{cls='Normal — >13.5cm';bg:'var(--gp)';txt:'var(--gd)'}
+    else if(muac<=12.5){cls='MAM — 11.5–12.5cm';bg='#fff8e1';txt='#b5850a'}
+    else if(muac<=13.5){cls='At risk — 12.5–13.5cm';bg='var(--op)';txt='var(--or)'}
+    else{cls='Normal — >13.5cm';bg='var(--gp)';txt='var(--gd)'}
   }
   el.style.display='block';
-  el.style.background=bg;el.style.color=txt;el.style.border='1px solid '+bg;
-  el.textContent='MUAC classification: '+cls;
+  el.style.background=bg;el.style.color=txt;el.style.border='1px solid #ccc';
+  el.textContent='MUAC: '+cls;
 }
 
 // WHZ lookup tables (WHO WFH z-scores, under 5)
@@ -630,13 +638,19 @@ function calcAdmWhz(){
   const el=document.getElementById('whz-auto');if(!el)return;
   if(!ht||!wt||!sex){el.style.display='none';return}
   const r=lookupWHZ(ht,wt,sex);
-  if(!r){el.style.display='none';el.innerHTML='';return}
-  const label=age<24?'WLZ (Weight-for-Length)':'WHZ (Weight-for-Height)';
+  if(!r){
+    el.style.display='block';
+    el.style.background='#fff8e1';el.style.borderColor='#ffe082';
+    el.innerHTML='<span style="color:#b5850a">Height out of reference range (45–110cm). Manually select WHZ above.</span>';
+    return;
+  }
+  const label=age>0&&age<24?'WLZ (Weight-for-Length)':'WHZ (Weight-for-Height)';
   const colMap={'wgr':'var(--rd)','wgm':'var(--or)','wgg':'var(--gd)'};
   el.style.display='block';
-  el.innerHTML=`<strong>${label}:</strong> <span style="color:${colMap[r.cls]||'var(--gd)'}"><strong>${r.score} — ${r.label}</strong></span><br><small style="color:var(--tm)">Based on height ${ht}cm, weight ${wt}kg, sex ${sex==='M'?'Male':'Female'}</small>`;
+  el.style.background='var(--gg)';el.style.borderColor='#b7e4c7';
+  el.innerHTML='<strong>'+label+':</strong> <span style="color:'+colMap[r.cls]+'"><strong>'+r.score+' — '+r.label+'</strong></span> &nbsp;|&nbsp; <small style="color:var(--tm)">Ht '+ht+'cm · Wt '+wt+'kg · '+(sex==='M'?'Male':'Female')+'</small>';
   const whzEl=document.getElementById('a-whz');
-  if(whzEl){whzEl.value=r.score==='<-3SD'?'<-3SD':r.score==='-3SD to -2SD'?'-3SD to -2SD':'<-3SD'}
+  if(whzEl){whzEl.value=r.score==='<-3SD'?'<-3SD':r.score==='-3SD to -2SD'?'-3SD to -2SD':'>-2SD'}
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -721,9 +735,10 @@ function openPx(id){
     <div class="ctitle">Daily monitoring</div>
     ${monRows}${wgHtml}
     ${exitHtml}
-    <div style="display:flex;gap:8px;margin-top:20px">
-      <button class="btn bs" style="flex:1" onclick="editPx(${p.id})">Edit admission</button>
-      <button class="btn bs" style="flex:1" onclick="closeModal()">Close</button>
+    <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn bs" style="flex:1;min-width:120px" onclick="editPx(${p.id})">✏️ Edit admission</button>
+      <button class="btn bs" style="flex:1;min-width:120px;color:var(--rd);border-color:#ffcdd2" onclick="deletePx(${p.id})">🗑 Delete patient</button>
+      <button class="btn bs" style="width:100%" onclick="closeModal()">Close</button>
     </div>`;
   document.getElementById('modal').classList.add('open');
 }
@@ -764,6 +779,8 @@ function admitPatient(){
     if(idx>-1){data.id=window._editId;data.monitoring=patients[idx].monitoring;data.exit=patients[idx].exit;data.status=patients[idx].status;data.currentPhase=patients[idx].currentPhase;patients[idx]=data}
     window._editId=null;
     document.getElementById('admit-btn-txt').textContent='Admit patient';
+    document.getElementById('edit-banner').style.display='none';
+    document.getElementById('cancel-edit-btn').style.display='none';
     toast('✓ Patient record updated');
   }else{
     data.id=Date.now();patients.push(data);toast('✓ Patient admitted successfully');
@@ -783,9 +800,33 @@ function editPx(id){
     ['date','gfd','food','criteria','type','oedema','sero','tb','whz','comp'].forEach(f=>{const el=document.getElementById('a-'+f);if(el)el.value=p[f]||el.options[0].value});
     window._editId=id;
     document.getElementById('admit-btn-txt').textContent='Save changes';
-    checkAgeAlert();
+    document.getElementById('edit-banner').style.display='block';
+    document.getElementById('cancel-edit-btn').style.display='block';
+    checkAgeAlert();calcAdmWhz();classifyMUAC();
     toast('Editing '+p.name+' — make changes and save');
   },100);
+}
+
+function cancelEdit(){
+  window._editId=null;
+  document.getElementById('admit-btn-txt').textContent='Admit patient';
+  document.getElementById('edit-banner').style.display='none';
+  document.getElementById('cancel-edit-btn').style.display='none';
+  ['a-reg','a-name','a-phone','a-age','a-height','a-weight','a-muac','a-diag'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('a-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('whz-auto').style.display='none';
+  document.getElementById('muac-class').style.display='none';
+  document.getElementById('age-alert').style.display='none';
+  toast('Edit cancelled');
+}
+
+function deletePx(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  if(!confirm('Delete '+p.name+' ('+p.reg+')? This cannot be undone.')){return}
+  patients=patients.filter(x=>x.id!==id);
+  saveData();closeModal();
+  renderPxList('');updateDash();
+  toast('✓ Patient deleted');
 }
 
 // ─── DROPDOWNS ───────────────────────────────────────────────────────────────
@@ -876,26 +917,32 @@ function renderDayForm(p,d){
     <div class="fr">
       <div class="fg"><label>Therapeutic feed</label>
         <select id="m-feed" onchange="autoSaveMon()">
-          <option value="F-75 (2-hourly)" ${(m.feed||'F-75 (2-hourly)')==='F-75 (2-hourly)'?'selected':''}>F-75 — 2-hourly (Day 1)</option>
-          <option value="F-75 (3-hourly)" ${m.feed==='F-75 (3-hourly)'?'selected':''}>F-75 — 3-hourly</option>
-          <option value="F-75 (4-hourly)" ${m.feed==='F-75 (4-hourly)'?'selected':''}>F-75 — 4-hourly</option>
-          <option value="F-100 (transition)" ${m.feed==='F-100 (transition)'?'selected':''}>F-100 — Transition</option>
-          <option value="F-100 (free feeding)" ${m.feed==='F-100 (free feeding)'?'selected':''}>F-100 — Free feeding (Phase 2)</option>
-          <option value="RUTF" ${m.feed==='RUTF'?'selected':''}>RUTF</option>
-          ${isUnder6?`<option value="Diluted F-100" ${m.feed==='Diluted F-100'?'selected':''}>Diluted F-100 (&lt;6 months)</option>`:''}
-          <option value="Breast milk" ${m.feed==='Breast milk'?'selected':''}>Breast milk only</option>
-          <option value="Breast milk + supplement" ${m.feed==='Breast milk + supplement'?'selected':''}>Breast milk + supplement</option>
-          <option value="F-75 via NG" ${m.feed==='F-75 via NG'?'selected':''}>F-75 via NG tube</option>
-          <option value="IV + F-75" ${m.feed==='IV + F-75'?'selected':''}>IV fluids + F-75</option>
+          <optgroup label="Phase 1 — Stabilisation">
+            <option value="F-75 (2-hourly)" ${(m.feed||'F-75 (2-hourly)')==='F-75 (2-hourly)'?'selected':''}>F-75 — 2-hourly (Day 1)</option>
+            <option value="F-75 (3-hourly)" ${m.feed==='F-75 (3-hourly)'?'selected':''}>F-75 — 3-hourly</option>
+            <option value="F-75 (4-hourly)" ${m.feed==='F-75 (4-hourly)'?'selected':''}>F-75 — 4-hourly</option>
+            <option value="ReSoMal + F-75 (12hr plan)" ${m.feed==='ReSoMal + F-75 (12hr plan)'?'selected':''}>ReSoMal + F-75 — 12hr plan (post-shock/dehydration)</option>
+          </optgroup>
+          <optgroup label="Transition">
+            <option value="F-100 (transition)" ${m.feed==='F-100 (transition)'?'selected':''}>F-100 — Transition (same volume as F-75)</option>
+          </optgroup>
+          <optgroup label="Phase 2 — Rehabilitation">
+            <option value="F-100 (free feeding)" ${m.feed==='F-100 (free feeding)'?'selected':''}>F-100 — Free feeding (150–220 kcal/kg/day)</option>
+            <option value="RUTF" ${m.feed==='RUTF'?'selected':''}>RUTF (Plumpy'nut / BP-100)</option>
+          </optgroup>
+          <optgroup label="Infants <6 months">
+            <option value="Diluted F-100" ${m.feed==='Diluted F-100'?'selected':''}>Diluted F-100 (add 35ml water per 100ml)</option>
+            <option value="F-75 (<6 months)" ${m.feed==='F-75 (<6 months)'?'selected':''}>F-75 (&lt;6 months)</option>
+            <option value="Breast milk" ${m.feed==='Breast milk'?'selected':''}>Breast milk only</option>
+            <option value="Breast milk + Diluted F-100" ${m.feed==='Breast milk + Diluted F-100'?'selected':''}>Breast milk + Diluted F-100</option>
+          </optgroup>
         </select>
       </div>
       <div class="fg"><label>Feeding method</label>
         <select id="m-method" onchange="autoSaveMon()">
-          <option value="Oral" ${(m.method||'Oral')==='Oral'?'selected':''}>Oral (cup)</option>
+          <option value="Oral" ${(m.method||'Oral')==='Oral'?'selected':''}>Oral (cup/spoon)</option>
           <option value="NG tube" ${m.method==='NG tube'?'selected':''}>NG tube</option>
-          <option value="Oral + NG" ${m.method==='Oral + NG'?'selected':''}>Oral + NG</option>
-          <option value="IV" ${m.method==='IV'?'selected':''}>IV fluids</option>
-          <option value="IV + oral" ${m.method==='IV + oral'?'selected':''}>IV + oral</option>
+          <option value="Oral + NG" ${m.method==='Oral + NG'?'selected':''}>Oral + NG tube</option>
         </select>
       </div>
     </div>
