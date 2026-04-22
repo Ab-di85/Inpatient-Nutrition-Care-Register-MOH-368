@@ -185,9 +185,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 
     <div class="sh">Demographics</div>
     <div class="fr">
-      <div class="fg"><label>Age (months)</label><input id="a-age" type="number" placeholder="e.g. 12" min="0" oninput="checkAgeAlert()"></div>
+      <div class="fg"><label>Age (months)</label><input id="a-age" type="number" placeholder="e.g. 12" min="0" oninput="checkAgeAlert();calcAdmWhz()"></div>
       <div class="fg"><label>Sex</label>
-        <select id="a-sex"><option value="">Select</option><option value="F">Female</option><option value="M">Male</option></select>
+        <select id="a-sex" onchange="calcAdmWhz()"><option value="">Select</option><option value="F">Female</option><option value="M">Male</option></select>
       </div>
     </div>
     <div id="age-alert" style="display:none" class="ibox">⚠ Child is under 6 months — special management applies. Use diluted F-100 or F-75. Do NOT give full-strength F-100.</div>
@@ -426,6 +426,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="fg"><label>Via (next programme)</label><input id="e-via" placeholder="e.g. OTP, SFP, home"></div>
       <div class="fg"><label>Follow-up date</label><input id="e-fu" type="date"></div>
     </div>
+    <div class="fg"><label>Referral facility (OTC continuation)</label><input id="e-ref-facility" placeholder="Name and location of OTC facility"></div>
+    <div id="e-rutf-box" class="gbox" style="margin-bottom:8px"></div>
   </div>
 
   <div class="card">
@@ -623,16 +625,18 @@ function lookupWHZ(heightCm, weightKg, sex){
 function calcAdmWhz(){
   const ht=parseFloat(document.getElementById('a-height')?.value)||0;
   const wt=parseFloat(document.getElementById('a-weight')?.value)||0;
-  const sex=document.getElementById('a-sex2')?.value||document.getElementById('a-sex')?.value||'';
+  const sex=document.getElementById('a-sex')?.value||'';
+  const age=parseFloat(document.getElementById('a-age')?.value)||0;
   const el=document.getElementById('whz-auto');if(!el)return;
   if(!ht||!wt||!sex){el.style.display='none';return}
   const r=lookupWHZ(ht,wt,sex);
-  if(!r){el.style.display='none';return}
+  if(!r){el.style.display='none';el.innerHTML='';return}
+  const label=age<24?'WLZ (Weight-for-Length)':'WHZ (Weight-for-Height)';
+  const colMap={'wgr':'var(--rd)','wgm':'var(--or)','wgg':'var(--gd)'};
   el.style.display='block';
-  el.innerHTML=`WHZ auto-classification: <strong class="${r.cls}">${r.score} — ${r.label}</strong> (height ${ht}cm, weight ${wt}kg)`;
-  // Auto-set the WHZ dropdown
+  el.innerHTML=`<strong>${label}:</strong> <span style="color:${colMap[r.cls]||'var(--gd)'}"><strong>${r.score} — ${r.label}</strong></span><br><small style="color:var(--tm)">Based on height ${ht}cm, weight ${wt}kg, sex ${sex==='M'?'Male':'Female'}</small>`;
   const whzEl=document.getElementById('a-whz');
-  if(whzEl){whzEl.value=r.score==='<-3SD'?'<-3SD':'-3SD to -2SD'}
+  if(whzEl){whzEl.value=r.score==='<-3SD'?'<-3SD':r.score==='-3SD to -2SD'?'-3SD to -2SD':'<-3SD'}
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
@@ -818,7 +822,7 @@ function loadMonitor(){
 function renderDayTabs(p){
   const tabs=document.getElementById('day-tabs');
   const days=Object.keys(p.monitoring||{}).map(Number);
-  tabs.innerHTML=Array.from({length:12},(_,i)=>{
+  tabs.innerHTML=Array.from({length:30},(_,i)=>{
     const d=i+1;
     const has=days.includes(d)&&(p.monitoring[d].wt||p.monitoring[d].feed);
     return`<button class="tab-btn ${d===_monDay?'active':''}" onclick="switchDay(${d},this)" style="${has?'border-color:var(--gl);color:var(--gd)':''}">${d===_monDay?'Day '+d:'D'+d}</button>`;
@@ -901,12 +905,37 @@ function renderDayForm(p,d){
     </div>
     <div id="intake-check" style="margin-top:-8px;margin-bottom:12px;font-size:12px"></div>
 
+    ${(m.feed||'').includes('RUTF')?`
+    <div class="calc-box" style="margin-bottom:12px">
+      <div class="calc-title">RUTF auto-calculation</div>
+      ${(()=>{const wt=parseFloat(p.weight||0);const r=getRUTF(wt);return r?`
+      <div class="calc-row"><span>Daily ration (Plumpy'nut)</span><span><strong>${r[2]} sachets/day</strong></span></div>
+      <div class="calc-row"><span>BP-100 bars/day</span><span><strong>${r[3]} bars/day</strong></span></div>
+      <div class="calc-row"><span>Energy</span><span><strong>${r[2]*500} kcal/day</strong></span></div>
+      <div class="calc-row"><span>Weight range</span><span>${r[0]}–${r[1]} kg</span></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--tm)">⚠ Do NOT give iron — RUTF already contains iron<br>Check intake 5× daily. Offer water freely during/after.</div>`:'<div style="font-size:12px">Enter admission weight to calculate RUTF ration</div>'})()}
+    </div>
+    <div class="calc-box" style="margin-bottom:12px;background:#fff8e1;border-color:#ffe082">
+      <div class="calc-title" style="color:#b5850a">Appetite test (RUTF)</div>
+      ${(()=>{const wt=parseFloat(p.weight||0);
+        let portion='';
+        if(wt<4)portion='1/8 to 1/4 sachet (11–23g)';
+        else if(wt<7)portion='1/4 to 1/3 sachet (23–31g)';
+        else if(wt<10)portion='1/3 to 1/2 sachet (31–46g)';
+        else if(wt<15)portion='1/2 to 3/4 sachet (46–69g)';
+        else if(wt<30)portion='3/4 to 1 sachet (69–92g)';
+        else portion='>1 sachet (>92g)';
+        return wt?`<div class="calc-row"><span>Child must eat</span><span><strong>${portion}</strong> in 15–30 min</span></div>
+        <div class="calc-row"><span>Pass</span><span>✓ Eats required amount</span></div>
+        <div class="calc-row"><span>Fail</span><span>✗ Does not eat required amount → refer inpatient</span></div>`:'<div style="font-size:12px">Enter weight to calculate appetite test amount</div>';})()}
+    </div>`:''}
+
     <div class="sh">Day ${d} — Fluid management (if shock / dehydration)</div>
     <div class="fg"><label>Dehydration / fluid status</label>
       <select id="m-dehy" onchange="showFluidPlan()">
         <option value="None" ${(m.dehy||'None')==='None'?'selected':''}>None / resolved</option>
         <option value="Shock" ${m.dehy==='Shock'?'selected':''}>SHOCK — IV Ringer's lactate + 5% dextrose</option>
-        <option value="Dehydration — ReSoMal" ${m.dehy==='Dehydration — ReSoMal'?'selected':''}>Dehydration (no shock) — ReSoMal oral/NG</option>
+        <option value="Dehydration" ${m.dehy==='Dehydration'?'selected':''}>Dehydration (no shock) — ReSoMal oral/NG</option>
         <option value="Monitoring" ${m.dehy==='Monitoring'?'selected':''}>Monitoring only</option>
       </select>
     </div>
@@ -924,33 +953,41 @@ function renderDayForm(p,d){
 }
 
 function showFluidPlan(){
-  const sel=document.getElementById('m-dehy');
-  const el=document.getElementById('fluid-plan');
-  if(!sel||!el)return;
-  const v=sel.value;
+  const v=document.getElementById('m-dehy')?.value;
   const p=patients.find(x=>x.id===_monId);
   const wKg=p&&p.weight?parseFloat(p.weight):null;
-  if(v==='None'||v==='Monitoring'){el.style.display='none';autoSaveMon();return}
+  const el=document.getElementById('fluid-plan');if(!el)return;
+  if(!v||v==='None'){el.style.display='none';return}
   el.style.display='block';
+  const wt=wKg||0;const r5=wt?Math.round(wt*5):'?';const r75=wt?Math.round(wt*7.5):'?';
+  const r10=wt?Math.round(wt*10):'?';
   if(v==='Shock'){
     const f=wKg?FLUIDS.find(r=>r[0]===Math.round(wKg)):null;
-    el.innerHTML=`<strong>⚠ SHOCK PROTOCOL — Ringer's Lactate with 5% Dextrose</strong><br>
-    ${f?`For ${wKg}kg: Give <strong>${f[1]} ml</strong> IV over 2 hours (${f[2]} drops/min adult IV set)<br>`:'Enter admission weight to get exact volumes<br>'}
-    If severe anaemia: <strong>Blood transfusion first</strong>, NOT Ringer's<br><br>
-    <strong>After shock resolved → 12-hour plan:</strong><br>
-    • ReSoMal 7.5 ml/kg/hr for 1 hour<br>
-    • Then alternate ReSoMal and F-75 at 7.5 ml/kg for up to 10 hours<br>
-    • At 12 hours: switch to 3-hourly F-75 feeds<br>
-    ${f?`Oral/NG amount: <strong>${f[3]} ml</strong> per feed`:''}`;
+    el.innerHTML=`<strong style="color:var(--rd)">⚠ SHOCK PROTOCOL</strong><br>
+<strong>Step 1 — IV Ringer's Lactate with 5% Dextrose:</strong><br>
+${f?`• Give <strong>${f[1]} ml</strong> IV over 2 hours<br>• Drip rate: <strong>${f[2]} drops/min</strong> (adult IV set, 20 drops=1ml)<br>`:'• Enter weight to calculate exact volume<br>'}
+• If severe anaemia: <strong>Blood transfusion first</strong>, NOT Ringer's<br><br>
+<strong>Step 2 — After shock resolved (omit first 2hrs of ReSoMal):</strong><br>
+• Start alternating F-75 and ReSoMal at <strong>7.5 ml/kg/hr (${r75} ml/hr)</strong><br>
+• Continue alternating for up to 10 hours<br>
+• Then switch to 2-hourly F-75 feeds normally<br><br>
+<em style="font-size:11px">⚠ Stop ReSoMal if: respiratory rate ↑5/min, pulse ↑25/min, liver enlarges, crackles, engorgement of veins, gallop rhythm, increasing oedema</em>`;
+  } else if(v==='Dehydration'){
+    el.innerHTML=`<strong style="color:var(--or)">Dehydration (NO shock) — ReSoMal oral/NG plan</strong><br>
+<strong>First 2 hours — every 30 minutes:</strong><br>
+• Give <strong>5 ml/kg ReSoMal</strong> every 30 min = <strong>${r5} ml</strong> per dose (${wt?Math.round(r5*4):''} ml total)<br><br>
+<strong>Next up to 10 hours — alternating hourly:</strong><br>
+• Hour 1: ReSoMal <strong>${r75} ml</strong> (7.5 ml/kg)<br>
+• Hour 2: F-75 (see F-75 calculator for amount)<br>
+• Continue alternating ReSoMal/F-75 for up to 10 hours<br>
+• ReSoMal can be adjusted 5–10 ml/kg/hr based on child's willingness<br><br>
+<strong>After 10 hours if still passing loose stools:</strong><br>
+• Give ReSoMal <strong>${r10} ml</strong> (10 ml/kg) after each loose stool<br><br>
+<em style="font-size:11px">⚠ Do NOT give IV fluids — only oral/NG ReSoMal for dehydration without shock<br>
+⚠ Stop if overhydration signs appear (same as shock protocol above)</em>`;
   } else {
-    const f=wKg?FLUIDS.find(r=>r[0]===Math.round(wKg)):null;
-    el.innerHTML=`<strong>Dehydration (no shock) — ReSoMal plan:</strong><br>
-    Give ReSoMal 10 ml/kg/hr for 2 hours (oral or NG)<br>
-    ${f?`For ${wKg}kg: <strong>${f[3]*1.3|0} ml</strong> over 2 hours<br>`:''}
-    Then: 7.5 ml/kg alternating with F-75 for up to 10 hours<br>
-    At 12 hours: switch to 3-hourly F-75 oral feeds`;
+    el.innerHTML='<strong>Monitoring only</strong> — observe for signs of dehydration or improvement';
   }
-  autoSaveMon();
 }
 
 function calcIntake(){
@@ -1112,6 +1149,17 @@ function renderFluidCalc(el,wKg){
 function prefillExit(){
   document.getElementById('e-date').value=new Date().toISOString().slice(0,10);
   calcLOS();calcExitMetrics();
+  // Auto-calculate 1 week RUTF at discharge
+  const id=parseInt(document.getElementById('ex-px').value);
+  const p=patients.find(x=>x.id===id);
+  const el=document.getElementById('e-rutf-box');
+  if(p&&p.weight&&el){
+    const r=getRUTF(parseFloat(p.weight));
+    if(r){
+      const weekly=Math.ceil(r[2]*7);
+      el.innerHTML=`<strong>RUTF for 1 week at discharge:</strong> <strong>${weekly} sachets</strong> (${r[2]} sachets/day × 7 days)<br><small>Give to caregiver before transfer to OTC facility</small>`;
+    }
+  }
 }
 function calcLOS(){
   const id=parseInt(document.getElementById('ex-px').value);
@@ -1159,6 +1207,8 @@ function recordExit(){
     fu:document.getElementById('e-fu').value,
     inst:document.getElementById('e-inst').value,
     notes:document.getElementById('e-notes').value,
+    refFacility:document.getElementById('e-ref-facility')?.value||'',
+    rutfIssued:document.getElementById('e-rutf-issued')?.value||'',
   };
   p.exit.summary=genSummary(p);
   saveData();
@@ -1196,7 +1246,12 @@ WHZ: ${p.exit.whz||'—'} | MUAC: ${p.exit.muac?p.exit.muac+' cm':'—'} | Oedem
 ${wg?'Weight gain rate: '+wg.rate+' g/kg/day':''}
 Via: ${p.exit.via||'—'} | Follow-up: ${fmtDate(p.exit.fu)}
 Instructions given: ${p.exit.inst||'—'}
-Notes: ${p.exit.notes||'—'}`;
+Notes: ${p.exit.notes||'—'}
+Referral OTC facility: ${p.exit.refFacility||'______________________'}
+RUTF issued at discharge: ${(()=>{const r=getRUTF(parseFloat(p.weight||0));return r?Math.ceil(r[2]*7)+' sachets (1 week supply — '+r[2]+'/day × 7 days)':'—'})()}
+
+NOTE: Child should report to referral OTC facility within 7 days of discharge.
+Caregiver should be educated on RUTF administration and follow-up importance.`;
 }
 
 // ─── CONNECTIVITY ─────────────────────────────────────────────────────────────
