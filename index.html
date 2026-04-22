@@ -5,1203 +5,1239 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1a472a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Nutrition Register">
-<meta name="description" content="MOH Inpatient Nutrition Care Register">
-<title>Inpatient Nutrition Register</title>
+<title>MOH 368 — Inpatient Nutrition Register</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --green-dark: #1a472a;
-  --green-mid: #2d6a4f;
-  --green-light: #40916c;
-  --green-pale: #d8f3dc;
-  --green-ghost: #f0faf2;
-  --amber: #e9c46a;
-  --amber-dark: #b5850a;
-  --red: #c1121f;
-  --red-pale: #fff0f0;
-  --blue: #023e8a;
-  --blue-pale: #e9f2ff;
-  --text: #1a1a1a;
-  --text-muted: #5a6472;
-  --border: #d0ddd4;
-  --surface: #ffffff;
-  --bg: #f5f7f5;
-  --radius: 8px;
-  --radius-lg: 12px;
+:root{
+  --gd:#1a472a;--gm:#2d6a4f;--gl:#40916c;--gp:#d8f3dc;--gg:#f0faf2;
+  --am:#e9c46a;--rd:#c1121f;--rp:#fff0f0;--bl:#023e8a;--bp:#e9f2ff;
+  --or:#e76f51;--op:#fff3ef;
+  --tx:#1a1a1a;--tm:#5a6472;--br:#d0ddd4;--sf:#fff;--bg:#f5f7f5;
+  --r:8px;--rl:12px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
-body { display: flex; flex-direction: column; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
+body{display:flex;flex-direction:column}
 
 /* TOP BAR */
-.topbar {
-  background: var(--green-dark);
-  color: white;
-  padding: 0 16px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  flex-shrink: 0;
-}
-.topbar-title { font-size: 13px; font-weight: 500; letter-spacing: 0.02em; }
-.topbar-sub { font-size: 10px; opacity: 0.65; margin-top: 1px; font-family: 'IBM Plex Mono', monospace; }
-.offline-badge {
-  font-size: 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  padding: 3px 8px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.12);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.offline-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
-.offline-badge.online .dot { background: #52b788; }
+.topbar{background:var(--gd);color:#fff;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
+.t-title{font-size:13px;font-weight:500}.t-sub{font-size:10px;opacity:.65;margin-top:1px;font-family:'IBM Plex Mono',monospace}
+.cbadge{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.12);display:flex;align-items:center;gap:4px}
+.cbadge .dot{width:6px;height:6px;border-radius:50%;background:var(--am)}
+.cbadge.on .dot{background:#52b788}
+.lbtn{background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;margin-left:8px}
 
-/* MAIN CONTENT */
-.main { flex: 1; overflow-y: auto; padding-bottom: 80px; }
-
-/* BOTTOM NAV */
-.bottom-nav {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 4px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 10px;
-  gap: 4px;
-  border: none;
-  background: none;
-  transition: color 0.15s;
-}
-.nav-item.active { color: var(--green-dark); }
-.nav-item svg { width: 20px; height: 20px; }
-.nav-item .nav-label { font-weight: 500; }
+/* LAYOUT */
+.main{flex:1;overflow-y:auto;padding-bottom:80px}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;color:var(--tm);font-size:10px;gap:3px;border:none;background:none;transition:color .15s}
+.ni.active{color:var(--gd)}.ni svg{width:20px;height:20px}.nl{font-weight:500}
 
 /* PAGES */
-.page { display: none; padding: 16px; }
-.page.active { display: block; }
+.page{display:none;padding:16px}.page.active{display:block}
 
 /* CARDS */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  margin-bottom: 12px;
-}
-.card-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
+.card{background:var(--sf);border:1px solid var(--br);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.ctitle{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:12px}
+.sh{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gm);padding:8px 0 4px;border-bottom:1px solid var(--gp);margin-bottom:12px;margin-top:4px}
 
 /* STATS */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-}
-.stat-card.green { background: var(--green-pale); border-color: #b7e4c7; }
-.stat-card.amber { background: #fff8e1; border-color: #ffe082; }
-.stat-card.red { background: var(--red-pale); border-color: #ffcdd2; }
-.stat-num { font-size: 32px; font-weight: 300; font-family: 'IBM Plex Mono', monospace; line-height: 1; }
-.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sc{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);padding:14px}
+.sc.g{background:var(--gp);border-color:#b7e4c7}.sc.r{background:var(--rp);border-color:#ffcdd2}.sc.a{background:#fff8e1;border-color:#ffe082}
+.sn{font-size:32px;font-weight:300;font-family:'IBM Plex Mono',monospace;line-height:1}
+.sl{font-size:11px;color:var(--tm);margin-top:4px}
 
 /* FORMS */
-.form-group { margin-bottom: 14px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-label { font-size: 11px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-input, select, textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  appearance: none;
-  -webkit-appearance: none;
-  transition: border-color 0.15s;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--green-light);
-  box-shadow: 0 0 0 3px rgba(64,145,108,0.12);
-}
-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a6472' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+.fg{margin-bottom:14px}.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+label{font-size:11px;font-weight:500;color:var(--tm);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--br);border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--tx);background:var(--sf);appearance:none;-webkit-appearance:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gl);box-shadow:0 0 0 3px rgba(64,145,108,.12)}
+input[readonly]{background:#f9f9f9;color:var(--tm);font-weight:500}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a6472' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px}
 
 /* BUTTONS */
-.btn {
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.btn-primary { background: var(--green-dark); color: white; width: 100%; justify-content: center; }
-.btn-primary:active { background: var(--green-mid); transform: scale(0.98); }
-.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-.btn-sm { padding: 7px 12px; font-size: 12px; }
+.btn{padding:12px 20px;border-radius:var(--r);font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.bp{background:var(--gd);color:#fff;width:100%;justify-content:center}.bp:active{background:var(--gm);transform:scale(.98)}
+.bs{background:var(--sf);color:var(--tx);border:1px solid var(--br)}
+.bsm{padding:7px 12px;font-size:12px}
+.binfo{background:var(--bp);color:var(--bl);border:1px solid #bfd7ff;font-size:12px;padding:8px 14px}
 
 /* PATIENT LIST */
-.patient-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-}
-.patient-item:last-child { border-bottom: none; }
-.patient-item:active { background: var(--green-ghost); margin: 0 -16px; padding: 12px 16px; border-radius: var(--radius); }
-.patient-name { font-weight: 500; font-size: 14px; }
-.patient-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
-.badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-}
-.badge-active { background: var(--green-pale); color: var(--green-dark); }
-.badge-cured { background: var(--blue-pale); color: var(--blue); }
-.badge-rip { background: var(--red-pale); color: var(--red); }
-.badge-default { background: #f5f5f5; color: #666; }
+.pi{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--br);cursor:pointer}
+.pi:last-child{border-bottom:none}
+.pn{font-weight:500;font-size:14px}.pm{font-size:11px;color:var(--tm);margin-top:2px;font-family:'IBM Plex Mono',monospace}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.ba{background:var(--gp);color:var(--gd)}.bc{background:var(--bp);color:var(--bl)}.br2{background:var(--rp);color:var(--rd)}.bd{background:#f5f5f5;color:#666}
+.bp1{background:var(--op);color:var(--or)}.bp2{background:var(--gp);color:var(--gd)}
 
 /* SEARCH */
-.search-wrap { position: relative; margin-bottom: 12px; }
-.search-wrap input { padding-left: 36px; }
-.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.sw{position:relative;margin-bottom:12px}.sw input{padding-left:36px}
+.si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--tm)}
 
-/* DAY MONITORING */
-.day-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; scrollbar-width: none; }
-.day-tabs::-webkit-scrollbar { display: none; }
-.day-tab {
-  flex-shrink: 0;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  color: var(--text-muted);
-  font-family: 'IBM Plex Mono', monospace;
-}
-.day-tab.active { background: var(--green-dark); color: white; border-color: var(--green-dark); }
-.day-tab.has-data { border-color: var(--green-light); color: var(--green-dark); }
+/* BOXES */
+.ibox{background:var(--bp);border:1px solid #bfd7ff;border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--bl);margin-bottom:12px;line-height:1.6}
+.wbox{background:var(--op);border:1px solid #f4a261;border-radius:var(--r);padding:10px 12px;font-size:12px;color:#c05621;margin-bottom:12px;line-height:1.6}
+.gbox{background:var(--gg);border:1px solid #b7e4c7;border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--gd);margin-bottom:12px;line-height:1.6}
+.rbox{background:var(--rp);border:1px solid #ffcdd2;border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--rd);margin-bottom:12px;line-height:1.6}
 
-/* MODAL / DETAIL */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 200;
-  align-items: flex-end;
-}
-.modal-overlay.open { display: flex; }
-.modal-sheet {
-  background: var(--surface);
-  border-radius: 16px 16px 0 0;
-  padding: 20px 16px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding-bottom: calc(20px + env(safe-area-inset-bottom));
-}
-.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end}
+.moverlay.open{display:flex}
+.msheet{background:var(--sf);border-radius:16px 16px 0 0;padding:20px 16px;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.mhandle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
+.mtitle{font-size:16px;font-weight:600;margin-bottom:16px}
 
 /* TOAST */
-.toast {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--green-dark);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  z-index: 300;
-  opacity: 0;
-  transition: all 0.3s;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gd);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* EMPTY STATE */
-.empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty h3 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-.empty p { font-size: 13px; line-height: 1.5; }
+/* MISC */
+.empty{text-align:center;padding:40px 20px;color:var(--tm)}.empty p{font-size:13px;line-height:1.5}
+.divider{height:1px;background:var(--br);margin:16px 0}
+.ph{margin-bottom:16px}.ph h2{font-size:20px;font-weight:600}.ph p{font-size:12px;color:var(--tm);margin-top:2px}
+.dr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--br);font-size:13px}
+.dr:last-child{border-bottom:none}.dk{color:var(--tm);flex:1}.dv{font-weight:500;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;flex:1}
+.wgg{color:var(--gd);font-weight:600}.wgm{color:var(--or);font-weight:600}.wgr{color:var(--rd);font-weight:600}
+.phasebar{padding:10px 14px;border-radius:var(--r);font-size:12px;font-weight:500;margin-bottom:12px;border:1px solid}
+.phasebar.p1{background:var(--op);border-color:#f4a261;color:var(--or)}
+.phasebar.p2{background:var(--gp);border-color:#b7e4c7;color:var(--gd)}
+.step-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--br)}
+.step-row:last-child{border-bottom:none}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--gd);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-content{flex:1}.step-label{font-size:12px;font-weight:500;margin-bottom:4px}.step-sub{font-size:11px;color:var(--tm);line-height:1.4}
+.calc-box{background:var(--gg);border:1px solid #b7e4c7;border-radius:var(--r);padding:12px;margin-top:8px}
+.calc-title{font-size:11px;font-weight:600;color:var(--gd);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.calc-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.calc-row:last-child{border-bottom:none;font-weight:600;margin-top:4px;padding-top:6px}
+.fluid-table{width:100%;border-collapse:collapse;font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:8px}
+.fluid-table th{background:var(--gd);color:#fff;padding:6px 8px;text-align:center}
+.fluid-table td{padding:5px 8px;text-align:center;border-bottom:1px solid var(--br)}
+.fluid-table tr.highlight td{background:var(--gp);font-weight:600;color:var(--gd)}
+.tab-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.tab-row::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;border:1px solid var(--br);background:var(--sf);cursor:pointer;color:var(--tm)}
+.tab-btn.active{background:var(--gd);color:#fff;border-color:var(--gd)}
 
-/* SECTION DIVIDER */
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
+/* PIN */
+.pin-screen{position:fixed;inset:0;background:var(--gd);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;color:#fff}
+.pin-screen.hidden{display:none}
+.pin-logo{width:64px;height:64px;background:rgba(255,255,255,.12);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.pin-title{font-size:20px;font-weight:600;margin-bottom:4px}
+.pin-sub{font-size:13px;opacity:.65;margin-bottom:40px;text-align:center}
+.pin-dots{display:flex;gap:16px;margin-bottom:40px}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:transparent;transition:all .15s}
+.pin-dot.filled{background:#fff;border-color:#fff}.pin-dot.error{background:#ff6b6b;border-color:#ff6b6b}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
+.pin-key{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;font-family:'IBM Plex Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,transform .1s}
+.pin-key:active{background:rgba(255,255,255,.25);transform:scale(.93)}
+.pin-key.del{font-size:16px;background:transparent}.pin-key.empty{background:transparent;pointer-events:none}
+.pin-err{font-size:13px;color:#ff9999;margin-top:20px;min-height:20px;text-align:center}
+.pin-change{margin-top:24px;font-size:12px;color:rgba(255,255,255,.45);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'IBM Plex Sans',sans-serif}
 
-/* MONITORING GRID */
-.monitor-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.monitor-row:last-child { border-bottom: none; }
-.monitor-day { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: var(--text-muted); width: 40px; flex-shrink: 0; }
-.monitor-inputs { display: flex; gap: 8px; flex: 1; }
-.monitor-inputs input { font-size: 13px; padding: 8px 10px; }
-
-/* HEADER IN PAGES */
-.page-header { margin-bottom: 16px; }
-.page-header h2 { font-size: 20px; font-weight: 600; }
-.page-header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-/* DETAIL VIEW */
-.detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-.detail-row:last-child { border-bottom: none; }
-.detail-key { color: var(--text-muted); }
-.detail-val { font-weight: 500; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
-
-/* ADMIT SECTION HEADER */
-.section-header {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--green-mid);
-  padding: 8px 0 4px;
-  border-bottom: 1px solid var(--green-pale);
-  margin-bottom: 12px;
-}
-
-@media (min-width: 600px) {
-  .main { max-width: 600px; margin: 0 auto; }
-  .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); }
-}
-
-/* PIN LOCK SCREEN */
-.pin-screen {
-  position: fixed;
-  inset: 0;
-  background: var(--green-dark);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 24px;
-  color: white;
-}
-.pin-screen.hidden { display: none; }
-.pin-logo {
-  width: 64px; height: 64px;
-  background: rgba(255,255,255,0.12);
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 24px;
-}
-.pin-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-.pin-sub { font-size: 13px; opacity: 0.65; margin-bottom: 40px; text-align: center; }
-.pin-dots {
-  display: flex; gap: 16px; margin-bottom: 40px;
-}
-.pin-dot {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.4);
-  background: transparent;
-  transition: all 0.15s;
-}
-.pin-dot.filled { background: white; border-color: white; }
-.pin-dot.error { background: #ff6b6b; border-color: #ff6b6b; }
-.pin-keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 72px);
-  gap: 12px;
-}
-.pin-key {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  border: none;
-  color: white;
-  font-size: 22px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 400;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.1s, transform 0.1s;
-  -webkit-tap-highlight-color: transparent;
-}
-.pin-key:active { background: rgba(255,255,255,0.25); transform: scale(0.93); }
-.pin-key.del { font-size: 16px; background: transparent; }
-.pin-key.empty { background: transparent; pointer-events: none; }
-.pin-error-msg { font-size: 13px; color: #ff9999; margin-top: 20px; min-height: 20px; text-align: center; }
-.pin-setup-mode .pin-sub { color: rgba(255,255,255,0.8); }
-.pin-attempts { font-size: 12px; opacity: 0.5; margin-top: 8px; }
-.lock-btn {
-  position: absolute;
-  top: 16px; right: 16px;
-  background: rgba(255,255,255,0.15);
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: 'IBM Plex Sans', sans-serif;
-}
-.lock-btn:active { background: rgba(255,255,255,0.25); }
-.pin-change-link {
-  margin-top: 24px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.45);
-  cursor: pointer;
-  text-decoration: underline;
-  background: none;
-  border: none;
-  font-family: 'IBM Plex Sans', sans-serif;
-}
+@media(min-width:600px){.main,.bnav{max-width:600px}.main{margin:0 auto}.bnav{left:50%;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div>
-    <div class="topbar-title">Inpatient Nutrition Register</div>
-    <div class="topbar-sub">MOH · SAM Management</div>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <div class="offline-badge" id="conn-badge">
-      <div class="dot"></div>
-      <span id="conn-text">Offline</span>
-    </div>
-    <button class="lock-btn" onclick="lockApp()" title="Lock app">🔒 Lock</button>
+  <div><div class="t-title">Inpatient Nutrition Register</div><div class="t-sub">MOH 368 · SAM Inpatient Care</div></div>
+  <div style="display:flex;align-items:center;gap:4px">
+    <div class="cbadge" id="cbadge"><div class="dot"></div><span id="ctxt">Offline</span></div>
+    <button class="lbtn" onclick="lockApp()">🔒</button>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div class="page-header">
-      <h2>Dashboard</h2>
-      <p id="dash-date">Loading...</p>
-    </div>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num" id="s-total">0</div>
-        <div class="stat-label">Total admitted</div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-num" id="s-active">0</div>
-        <div class="stat-label">Currently admitted</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="s-cured">0</div>
-        <div class="stat-label">Cured / discharged</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-num" id="s-rip">0</div>
-        <div class="stat-label">Deceased</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Recent admissions</div>
-      <div id="recent-list"><div class="empty"><p>No patients yet</p></div></div>
-    </div>
-    <div class="card" style="background:var(--green-ghost); border-color:#b7e4c7;">
-      <div style="font-size:12px; color:var(--green-dark); font-weight:500; margin-bottom:4px;">✓ Works offline</div>
-      <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">All data is saved on this device. No internet needed to use this register.</div>
-    </div>
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="ph"><h2>Dashboard</h2><p id="dash-date"></p></div>
+  <div class="sgrid">
+    <div class="sc"><div class="sn" id="s-total">0</div><div class="sl">Total admitted</div></div>
+    <div class="sc g"><div class="sn" id="s-active">0</div><div class="sl">Currently admitted</div></div>
+    <div class="sc"><div class="sn" id="s-cured">0</div><div class="sl">Cured / discharged</div></div>
+    <div class="sc r"><div class="sn" id="s-rip">0</div><div class="sl">Deceased</div></div>
   </div>
-
-  <!-- ADMIT -->
-  <div class="page" id="page-admit">
-    <div class="page-header">
-      <h2>Admit patient</h2>
-      <p>New admission to inpatient programme</p>
-    </div>
-    <div class="card">
-      <div class="section-header">Identification</div>
-      <div class="form-group">
-        <label>Unique nutrition reg. number *</label>
-        <input id="a-reg" type="text" placeholder="e.g. 18804e">
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Admission date *</label>
-          <input id="a-date" type="date">
-        </div>
-        <div class="form-group">
-          <label>Client name *</label>
-          <input id="a-name" type="text" placeholder="Full name">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Physical address / phone</label>
-        <input id="a-phone" type="text" placeholder="Address or phone number">
-      </div>
-
-      <div class="section-header">Demographics</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Age (months)</label>
-          <input id="a-age" type="number" placeholder="e.g. 12" min="0">
-        </div>
-        <div class="form-group">
-          <label>Sex</label>
-          <select id="a-sex">
-            <option value="">Select</option>
-            <option value="F">Female</option>
-            <option value="M">Male</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="section-header">Programme & clinical</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Food security programme</label>
-          <select id="a-food">
-            <option value="No">No</option>
-            <option value="Yes">Yes (YEISIMO / SFP)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Admission criteria</label>
-          <select id="a-criteria">
-            <option value="2,3">2,3 (WHZ + MUAC)</option>
-            <option value="2">2 — WHZ only</option>
-            <option value="3">3 — MUAC only</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Type of admission</label>
-          <select id="a-type">
-            <option value="1">1 — New</option>
-            <option value="2">2 — Relapse</option>
-            <option value="3">3 — Transfer in (OTP/SFP)</option>
-            <option value="4">4 — Return defaulter</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Serostatus</label>
-          <select id="a-sero">
-            <option value="So">So — Negative</option>
-            <option value="S+">S+ — Positive</option>
-            <option value="Su">Su — Unknown</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>TB status</label>
-        <select id="a-tb">
-          <option value="To">To — Negative</option>
-          <option value="T+">T+ — Positive</option>
-        </select>
-      </div>
-
-      <div class="section-header">Anthropometric measurements</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Height / length (cm)</label>
-          <input id="a-height" type="number" step="0.1" placeholder="e.g. 72.0">
-        </div>
-        <div class="form-group">
-          <label>Weight (kg)</label>
-          <input id="a-weight" type="number" step="0.01" placeholder="e.g. 6.83">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>WHZ score</label>
-          <select id="a-whz">
-            <option value="<-3SD">&lt; -3SD</option>
-            <option value="-3SD to -2SD">-3SD to -2SD</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>MUAC (cm)</label>
-          <input id="a-muac" type="number" step="0.1" placeholder="e.g. 12.4">
-        </div>
-      </div>
-
-      <button class="btn btn-primary" onclick="admitPatient()" style="margin-top:8px;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Admit patient
-      </button>
-    </div>
+  <div class="card">
+    <div class="ctitle">Recent admissions</div>
+    <div id="recent-list"><div class="empty"><p>No patients yet</p></div></div>
   </div>
-
-  <!-- PATIENTS -->
-  <div class="page" id="page-patients">
-    <div class="page-header">
-      <h2>Patient list</h2>
-    </div>
-    <div class="search-wrap">
-      <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="search" placeholder="Search by name or reg. number..." oninput="filterPatients(this.value)" id="search-input">
-    </div>
-    <div class="card">
-      <div id="patient-list"><div class="empty"><p>No patients admitted yet</p></div></div>
-    </div>
+  <div class="card" style="background:var(--gg);border-color:#b7e4c7">
+    <div style="font-size:12px;color:var(--gd);font-weight:500;margin-bottom:4px">✓ Works fully offline</div>
+    <div style="font-size:12px;color:var(--tm);line-height:1.5">All data saved on this device. No internet needed.</div>
   </div>
+</div>
 
-  <!-- MONITOR -->
-  <div class="page" id="page-monitor">
-    <div class="page-header">
-      <h2>Daily monitoring</h2>
-      <p>Weight & MUAC — Days 1 to 12</p>
+<!-- ADMIT -->
+<div class="page" id="page-admit">
+  <div class="ph"><h2>Admit patient</h2><p>SAM inpatient admission — MOH 368</p></div>
+  <div class="card">
+    <div class="sh">Identification</div>
+    <div class="fg"><label>Unique Nutrition Reg. Number *</label><input id="a-reg" placeholder="e.g. 18804e"></div>
+    <div class="fr">
+      <div class="fg"><label>Admission date *</label><input id="a-date" type="date"></div>
+      <div class="fg"><label>Client name *</label><input id="a-name" placeholder="Full name"></div>
     </div>
-    <div class="card">
-      <div class="form-group">
-        <label>Select patient</label>
-        <select id="monitor-patient" onchange="loadMonitor()">
-          <option value="">— select a patient —</option>
-        </select>
+    <div class="fg"><label>Physical address / phone</label><input id="a-phone" placeholder="Address or phone number"></div>
+
+    <div class="sh">Demographics</div>
+    <div class="fr">
+      <div class="fg"><label>Age (months)</label><input id="a-age" type="number" placeholder="e.g. 12" min="0" oninput="checkAgeAlert()"></div>
+      <div class="fg"><label>Sex</label>
+        <select id="a-sex"><option value="">Select</option><option value="F">Female</option><option value="M">Male</option></select>
       </div>
     </div>
-    <div id="monitor-area" style="display:none;">
-      <div class="card">
-        <div class="card-title" id="monitor-name"></div>
-        <div style="display:flex; gap:8px; font-size:11px; color:var(--text-muted); padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:4px;">
-          <span style="width:40px;">Day</span>
-          <span style="flex:1; text-align:center;">Weight (kg)</span>
-          <span style="flex:1; text-align:center;">MUAC (cm)</span>
-        </div>
-        <div id="day-rows"></div>
-        <button class="btn btn-primary" onclick="saveMonitor()" style="margin-top:16px;">Save monitoring data</button>
+    <div id="age-alert" style="display:none" class="ibox">⚠ Child is under 6 months — special management applies. Use diluted F-100 or F-75. Do NOT give full-strength F-100.</div>
+
+    <div class="sh">Programme</div>
+    <div class="fr">
+      <div class="fg"><label>General Food Distribution (GFD)</label>
+        <select id="a-gfd"><option value="No">No</option><option value="Yes">Yes</option></select>
+      </div>
+      <div class="fg"><label>Food Security Programme</label>
+        <select id="a-food"><option value="No">No</option><option value="Yes — YEISIMO">Yes — YEISIMO</option><option value="Yes — SFP">Yes — SFP</option></select>
       </div>
     </div>
-  </div>
 
-  <!-- EXIT -->
-  <div class="page" id="page-exit">
-    <div class="page-header">
-      <h2>Exit / discharge</h2>
-      <p>Record outcome when patient leaves</p>
-    </div>
-    <div class="form-group">
-      <label>Patient *</label>
-      <select id="exit-patient">
-        <option value="">— select a patient —</option>
+    <div class="sh">Classification</div>
+    <div class="fg"><label>Admission criteria</label>
+      <select id="a-criteria">
+        <option value="2,3">2,3 — WHZ &lt; -3SD + MUAC &lt; 11.5cm</option>
+        <option value="2">2 — WHZ &lt; -3SD only</option>
+        <option value="3">3 — MUAC &lt; 11.5cm only</option>
+        <option value="Oedema">Bilateral pitting oedema</option>
+        <option value="Oedema + 2,3">Oedema + WHZ/MUAC</option>
       </select>
     </div>
-
-    <!-- SECTION 1: DISCHARGE/TRANSFER MEASUREMENTS -->
-    <div class="card">
-      <div class="card-title" style="color:var(--green-dark); border-bottom:2px solid var(--green-pale); padding-bottom:8px; margin-bottom:14px;">
-        1 — Discharge / Transfer measurements
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Weight (kg)</label>
-          <input id="e-weight" type="number" step="0.01" placeholder="e.g. 7.50">
-        </div>
-        <div class="form-group">
-          <label>Length / height (cm)</label>
-          <input id="e-height" type="number" step="0.1" placeholder="e.g. 74.0">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>WHZ score</label>
-          <select id="e-whz">
-            <option value="">Select</option>
-            <option value=">-2SD">&gt; -2SD (recovered)</option>
-            <option value="-3SD to -2SD">-3SD to -2SD</option>
-            <option value="<-3SD">&lt; -3SD</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>MUAC (cm)</label>
-          <input id="e-muac" type="number" step="0.1" placeholder="e.g. 12.5">
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2: EXIT DETAILS -->
-    <div class="card">
-      <div class="card-title" style="color:var(--green-dark); border-bottom:2px solid var(--green-pale); padding-bottom:8px; margin-bottom:14px;">
-        2 — Exit details
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Exit date *</label>
-          <input id="e-date" type="date">
-        </div>
-        <div class="form-group">
-          <label>Length of stay (days)</label>
-          <input id="e-los" type="number" placeholder="e.g. 8" min="0">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Exit outcome *</label>
-        <select id="e-outcome">
-          <option value="">Select outcome</option>
-          <option value="Cured/Discharged">1 — Cured / Discharged</option>
-          <option value="R.I.P.">2 — Deceased (R.I.P.)</option>
-          <option value="Transfer out">3 — Transfer to another facility</option>
-          <option value="Default">4 — Default (non-respondent)</option>
-          <option value="Referred">5 — Referred</option>
+    <div class="fr">
+      <div class="fg"><label>Type of admission</label>
+        <select id="a-type">
+          <option value="1 — New">1 — New</option>
+          <option value="2 — Relapse">2 — Relapse</option>
+          <option value="3 — Transfer in">3 — Transfer in (OTP/SFP)</option>
+          <option value="4 — Return defaulter">4 — Return defaulter</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Via (next programme)</label>
-        <input id="e-via" placeholder="e.g. OTP, SFP, home">
+      <div class="fg"><label>Nutritional oedema grade</label>
+        <select id="a-oedema">
+          <option value="0">0 — None</option>
+          <option value="+">+ Mild (feet only)</option>
+          <option value="++">++ Moderate (feet + legs)</option>
+          <option value="+++">+++ Severe (generalised)</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Serostatus</label>
+        <select id="a-sero">
+          <option value="So">So — Negative</option><option value="S+">S+ — Positive</option><option value="S3">S3 — Unknown</option>
+        </select>
+      </div>
+      <div class="fg"><label>TB status</label>
+        <select id="a-tb">
+          <option value="To">To — Negative</option><option value="T+">T+ — Positive</option><option value="T3">T3 — Unknown</option>
+        </select>
       </div>
     </div>
 
-    <!-- SECTION 3: OBSERVATIONS/COMMENTS -->
-    <div class="card">
-      <div class="card-title" style="color:var(--green-dark); border-bottom:2px solid var(--green-pale); padding-bottom:8px; margin-bottom:14px;">
-        3 — Observations / comments
+    <div class="sh">Anthropometric measurements at admission</div>
+    <div class="fr">
+      <div class="fg"><label>Height / length (cm)</label><input id="a-height" type="number" step="0.1" placeholder="e.g. 72.0" oninput="calcAdmWhz()"></div>
+      <div class="fg"><label>Weight (kg)</label><input id="a-weight" type="number" step="0.01" placeholder="e.g. 6.83" oninput="calcAdmWhz()"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Sex (for WHZ)</label>
+        <select id="a-sex2" onchange="calcAdmWhz()"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select>
       </div>
-      <div class="form-group">
-        <label>Clinical notes or remarks</label>
-        <textarea id="e-notes" rows="4" placeholder="Any observations, referral notes, follow-up instructions..."></textarea>
+      <div class="fg"><label>MUAC (cm)</label><input id="a-muac" type="number" step="0.1" placeholder="e.g. 12.4" oninput="classifyMuac()"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>WHZ score (auto-calculated)</label><input id="a-whz" readonly placeholder="Enter height + weight + sex"></div>
+      <div class="fg"><label>WHZ classification (auto)</label><input id="a-whz-class" readonly placeholder="Auto"></div>
+    </div>
+    <div id="whz-calc-info" class="gbox" style="display:none;margin-top:-8px;margin-bottom:12px;font-size:12px"></div>
+
+    <div class="sh">Clinical at admission</div>
+    <div class="fr">
+      <div class="fg"><label>Complications at admission</label>
+        <select id="a-comp">
+          <option value="None">None</option>
+          <option value="Hypoglycaemia">Hypoglycaemia</option>
+          <option value="Hypothermia">Hypothermia</option>
+          <option value="Dehydration">Dehydration</option>
+          <option value="Shock">Shock</option>
+          <option value="Severe anaemia">Severe anaemia</option>
+          <option value="Pneumonia">Pneumonia</option>
+          <option value="Multiple">Multiple</option>
+        </select>
       </div>
+      <div class="fg"><label>Count of days (length of stay)</label><input id="a-los" readonly placeholder="Auto from exit date"></div>
+    </div>
+    <div class="fg"><label>Medical diagnosis / notes at admission</label>
+      <textarea id="a-diag" rows="2" placeholder="e.g. SAM with oedema grade ++, pneumonia, started gentamicin + penicillin..."></textarea>
     </div>
 
-    <button class="btn btn-primary" onclick="recordExit()" style="margin-bottom:8px;">
-      Record exit
+    <button class="btn bp" onclick="admitPatient()" style="margin-top:8px" id="admit-btn">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <span id="admit-btn-txt">Admit patient</span>
     </button>
   </div>
+</div>
+
+<!-- PATIENTS -->
+<div class="page" id="page-patients">
+  <div class="ph"><h2>Patient list</h2></div>
+  <div class="sw">
+    <svg class="si" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" placeholder="Search by name or reg. number..." oninput="filterPx(this.value)">
+  </div>
+  <div class="card"><div id="px-list"><div class="empty"><p>No patients admitted yet</p></div></div></div>
+</div>
+
+<!-- MONITOR -->
+<div class="page" id="page-monitor">
+  <div class="ph"><h2>Daily monitoring</h2><p>Clinical management per day</p></div>
+  <div class="card">
+    <div class="fg"><label>Select patient</label>
+      <select id="mon-px" onchange="loadMonitor()"><option value="">— select a patient —</option></select>
+    </div>
+  </div>
+  <div id="mon-area" style="display:none">
+    <div id="mon-phasebar" class="phasebar p1"></div>
+
+    <!-- DAY SELECTOR -->
+    <div class="card">
+      <div class="ctitle" id="mon-pname"></div>
+      <div class="tab-row" id="day-tabs"></div>
+      <div id="day-form"></div>
+    </div>
+
+    <!-- FLUID CALCULATOR -->
+    <div class="card" id="fluid-card">
+      <div class="ctitle">Fluid / feeding calculator</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="showCalc('f75',this)">F-75 amounts</button>
+        <button class="tab-btn" onclick="showCalc('f100',this)">F-100 amounts</button>
+        <button class="tab-btn" onclick="showCalc('rutf',this)">RUTF</button>
+        <button class="tab-btn" onclick="showCalc('fluid',this)">Fluid (shock)</button>
+      </div>
+      <div id="calc-area"></div>
+    </div>
+
+    <!-- WEIGHT GAIN -->
+    <div class="card">
+      <div class="ctitle">Weight gain analysis</div>
+      <div id="wg-area"><div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see weight gain analysis</p></div></div>
+    </div>
+
+    <!-- TRANSITION CRITERIA -->
+    <div class="card">
+      <div class="ctitle">Phase transition criteria</div>
+      <div class="gbox" style="margin-bottom:8px">
+        <strong>Phase 1 → Transition:</strong><br>
+        ✓ Oedema resolving (now at + level)<br>
+        ✓ Medical complications improving<br>
+        ✓ Child taking most F-75 feeds orally<br>
+        <em style="font-size:11px">Transition: Give F-100 at same volume as F-75 for 1–2 days, increase by 10ml each feed</em>
+      </div>
+      <div class="ibox" style="margin-bottom:8px">
+        <strong>Transition → Phase 2 (Rehabilitation):</strong><br>
+        ✓ Good appetite — taking ≥75% of F-100 prescribed<br>
+        ✓ Oedema at + level or fully resolved<br>
+        ✓ Medical problems resolved<br>
+        <em style="font-size:11px">Phase 2: Free feeding with F-100 (150–220 kcal/kg/day), introduce RUTF</em>
+      </div>
+      <div class="wbox" style="margin-bottom:8px">
+        <strong>Return to Phase 1 (any one of these):</strong><br>
+        ✗ Increasing or new oedema<br>
+        ✗ Rapid liver enlargement or abdominal distension<br>
+        ✗ Signs of fluid overload<br>
+        ✗ Weight loss from refeeding diarrhoea<br>
+        ✗ Weight loss 2 consecutive days<br>
+        ✗ Static weight 3 consecutive days<br>
+        ✗ Any severe complication (hypoglycaemia, shock, hypothermia)
+      </div>
+      <div class="ibox" style="margin-bottom:0">
+        <strong>Transfer to OTC (all must be met):</strong><br>
+        ✓ No danger signs for 24–48 hrs<br>
+        ✓ Medical problems resolved<br>
+        ✓ No ongoing weight loss<br>
+        ✓ Oedema not +++ and resolving<br>
+        ✓ Good appetite (≥75% RUTF prescribed)<br>
+        ✓ Caregiver willing and able
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXIT -->
+<div class="page" id="page-exit">
+  <div class="ph"><h2>Exit / discharge</h2><p>Record outcome when patient leaves</p></div>
+  <div class="card">
+    <div class="fg"><label>Patient *</label>
+      <select id="ex-px" onchange="prefillExit()"><option value="">— select a patient —</option></select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle" style="color:var(--gd);border-bottom:2px solid var(--gp);padding-bottom:8px;margin-bottom:14px">1 — Discharge / Transfer measurements</div>
+    <div class="fr">
+      <div class="fg"><label>Weight (kg)</label><input id="e-wt" type="number" step="0.01" placeholder="e.g. 7.50" oninput="calcExitMetrics()"></div>
+      <div class="fg"><label>Length / height (cm)</label><input id="e-ht" type="number" step="0.1" placeholder="e.g. 74.0"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>WHZ at discharge</label>
+        <select id="e-whz"><option value="">Select</option><option value="≥-2SD">≥ -2SD (recovered)</option><option value="-3SD to -2SD">-3SD to -2SD</option><option value="&lt;-3SD">&lt; -3SD</option></select>
+      </div>
+      <div class="fg"><label>MUAC (cm)</label><input id="e-muac" type="number" step="0.1" oninput="calcExitMetrics()"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Oedema at discharge</label>
+        <select id="e-oedema"><option value="0">0 — None</option><option value="+">+ Mild</option><option value="++">++ Moderate</option><option value="+++">+++ Severe</option></select>
+      </div>
+      <div class="fg"><label>Appetite at discharge</label>
+        <select id="e-app"><option value="Good">Good</option><option value="Fair">Fair</option><option value="Poor">Poor</option></select>
+      </div>
+    </div>
+    <div id="exit-metrics" style="display:none" class="gbox"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle" style="color:var(--gd);border-bottom:2px solid var(--gp);padding-bottom:8px;margin-bottom:14px">2 — Exit details</div>
+    <div class="fr">
+      <div class="fg"><label>Exit date *</label><input id="e-date" type="date" oninput="calcLOS()"></div>
+      <div class="fg"><label>Length of stay (auto)</label><input id="e-los" readonly placeholder="Auto-calculated"></div>
+    </div>
+    <div class="fg"><label>Exit outcome *</label>
+      <select id="e-out">
+        <option value="">Select outcome</option>
+        <option value="Cured/Discharged">1 — Cured / Discharged</option>
+        <option value="R.I.P.">2 — Deceased (R.I.P.)</option>
+        <option value="Transfer out">3 — Transfer to another facility</option>
+        <option value="Default">4 — Default (non-respondent)</option>
+        <option value="Referred">5 — Referred</option>
+        <option value="Non-recovered">6 — Non-recovered (&gt;2 months)</option>
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Via (next programme)</label><input id="e-via" placeholder="e.g. OTP, SFP, home"></div>
+      <div class="fg"><label>Follow-up date</label><input id="e-fu" type="date"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle" style="color:var(--gd);border-bottom:2px solid var(--gp);padding-bottom:8px;margin-bottom:14px">3 — Observations / comments</div>
+    <div class="fg"><label>Discharge instructions given to caregiver</label>
+      <select id="e-inst"><option value="Yes — full">Yes — full instructions given</option><option value="Yes — partial">Yes — partial</option><option value="No">No</option></select>
+    </div>
+    <div class="fg"><label>Clinical notes / remarks</label>
+      <textarea id="e-notes" rows="3" placeholder="Medications to continue, follow-up plan, referral notes..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn bp" onclick="recordExit()" style="margin-bottom:8px">Record exit &amp; generate summary</button>
+</div>
 
 </div><!-- end main -->
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-  <button class="nav-item active" onclick="showPage('dashboard', this)">
+<nav class="bnav">
+  <button class="ni active" onclick="showPage('dashboard',this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    <span class="nav-label">Dashboard</span>
+    <span class="nl">Dashboard</span>
   </button>
-  <button class="nav-item" onclick="showPage('admit', this)">
+  <button class="ni" onclick="showPage('admit',this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/><path d="M19 3v6M16 6h6"/></svg>
-    <span class="nav-label">Admit</span>
+    <span class="nl">Admit</span>
   </button>
-  <button class="nav-item" onclick="showPage('patients', this)">
+  <button class="ni" onclick="showPage('patients',this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span class="nav-label">Patients</span>
+    <span class="nl">Patients</span>
   </button>
-  <button class="nav-item" onclick="showPage('monitor', this)">
+  <button class="ni" onclick="showPage('monitor',this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    <span class="nav-label">Monitor</span>
+    <span class="nl">Monitor</span>
   </button>
-  <button class="nav-item" onclick="showPage('exit', this)">
+  <button class="ni" onclick="showPage('exit',this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    <span class="nav-label">Exit</span>
+    <span class="nl">Exit</span>
   </button>
 </nav>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- PATIENT DETAIL MODAL -->
+<div class="moverlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="msheet" id="modal-content"></div>
+</div>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-logo"><svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+  <div class="pin-title" id="pin-title">Enter PIN</div>
+  <div class="pin-sub" id="pin-sub">MOH Inpatient Nutrition Register</div>
+  <div class="pin-dots"><div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div><div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinKey('1')">1</button><button class="pin-key" onclick="pinKey('2')">2</button><button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button><button class="pin-key" onclick="pinKey('5')">5</button><button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button><button class="pin-key" onclick="pinKey('8')">8</button><button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key empty"></button><button class="pin-key" onclick="pinKey('0')">0</button><button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+  <button class="pin-change" id="pin-change" onclick="startChangePin()" style="display:none">Change PIN</button>
+</div>
+
 <script>
-let patients = [];
+// ─── REFERENCE DATA ───────────────────────────────────────────────────────────
+// F-75 amounts: key=weight*10, value=[2hr, 3hr, 4hr, dailyTotal, 80%min]
+// Normal oedema (0/+/++)
+const F75N = {
+  26:[25,40,55,338,265],28:[30,45,60,364,290],30:[35,50,65,390,310],32:[35,55,70,416,335],
+  34:[35,55,75,442,355],36:[40,60,80,468,375],38:[40,60,85,494,395],40:[45,65,90,520,415],
+  42:[45,70,90,546,435],44:[50,70,95,572,460],46:[50,75,100,598,480],48:[55,80,105,624,500],
+  50:[55,80,110,650,520],52:[55,85,115,676,540],54:[60,90,120,702,560],56:[60,90,125,728,580],
+  58:[65,95,130,754,605],60:[65,100,130,780,625],62:[70,100,135,806,645],64:[70,105,140,832,665],
+  66:[75,110,145,858,685],68:[75,110,150,884,705],70:[75,115,155,910,730],72:[80,120,160,936,750],
+  74:[80,120,160,962,770],76:[85,125,165,988,790],78:[85,130,170,1014,810],80:[90,130,175,1040,830],
+  82:[90,135,180,1066,855],84:[90,140,185,1092,875],86:[95,140,190,1118,895],88:[95,145,195,1144,915],
+  90:[100,145,200,1170,935],92:[100,150,200,1196,960],94:[105,155,205,1222,980],96:[105,155,210,1248,1000],
+  98:[110,160,215,1274,1020],100:[110,160,220,1300,1040],102:[85,130,170,1020,815],
+  104:[85,130,175,1040,830],106:[90,135,175,1060,850],108:[90,135,180,1080,865],
+  110:[90,140,185,1100,880],112:[95,140,185,1120,895],114:[95,145,190,1140,910],
+  116:[95,145,195,1160,930],118:[100,150,195,1180,945],120:[100,150,200,1200,960]
+};
+// Severe (+++) oedema
+const F75S = {
+  30:[25,40,50,300,240],32:[25,40,55,320,255],34:[30,45,60,340,270],36:[30,45,60,360,290],
+  38:[30,50,65,380,305],40:[35,50,65,400,320],42:[35,55,70,420,335],44:[35,55,75,440,350],
+  46:[40,60,75,460,370],48:[40,60,80,480,385],50:[40,65,85,500,400],52:[45,65,85,520,415],
+  54:[45,70,90,540,430],56:[45,70,95,560,450],58:[50,75,95,580,465],60:[50,75,100,600,480],
+  62:[50,80,105,620,495],64:[55,80,105,640,510],66:[55,85,110,660,530],68:[55,85,115,680,545],
+  70:[60,90,115,700,560],72:[60,90,120,720,575],74:[60,95,125,740,590],76:[65,95,125,760,610],
+  78:[65,100,130,780,625],80:[65,100,135,800,640],82:[70,105,135,820,655],84:[70,105,140,840,670],
+  86:[70,110,145,860,690],88:[75,110,145,880,705],90:[75,115,150,900,720],92:[75,115,155,920,735],
+  94:[80,120,155,940,750],96:[80,120,160,960,770],98:[80,125,165,980,785],100:[85,125,165,1000,800]
+};
+// F-100 per 4hr feed (6 feeds/day): [min_per_feed, max_per_feed, daily_min, daily_max]
+const F100 = {
+  20:[50,75,300,440],22:[55,80,330,484],24:[60,90,360,528],26:[65,95,390,572],
+  28:[70,105,420,616],30:[75,110,450,660],32:[80,115,480,704],34:[85,125,510,748],
+  36:[90,130,540,792],38:[95,140,570,836],40:[100,145,600,880],42:[105,155,630,924],
+  44:[110,160,660,968],46:[115,170,690,1012],48:[120,175,720,1056],50:[125,185,750,1100],
+  52:[130,190,780,1144],54:[135,200,810,1188],56:[140,205,840,1232],58:[145,215,870,1276],
+  60:[150,220,900,1320],62:[155,230,930,1364],64:[160,235,960,1408],66:[165,245,990,1452],
+  68:[170,250,1020,1496],70:[175,260,1050,1540],72:[180,265,1080,1584],74:[185,275,1110,1628],
+  76:[190,280,1140,1672],78:[195,290,1170,1716],80:[200,295,1200,1760],
+  85:[212,315,1275,1870],90:[225,330,1350,1980],95:[237,350,1425,2090],100:[250,365,1500,2200]
+};
+// RUTF sachets/day by weight range
+const RUTF = [[3.5,3.9,1.5,2],[4.0,5.4,2,3],[5.5,6.9,2.5,4],[7.0,8.4,3,5],[8.5,9.4,3,6],[9.5,10.4,3.5,7],[10.5,11.9,4,8],[12,99,4,9]];
+// Fluid table for shock [weight_kg, iv_shock_ml, iv_drops_min, oral_ng_ml]
+const FLUIDS = [[4,80,14,30],[5,100,17,37],[6,120,20,45],[7,140,24,52],[8,160,27,60],[9,180,30,67],[10,200,34,75],[11,220,37,82],[12,240,40,90],[13,260,44,97],[14,280,47,115],[15,300,50,122]];
 
-function loadData() {
-  try { patients = JSON.parse(localStorage.getItem('ncr_v1') || '[]'); } catch(e) { patients = []; }
+function getF75(wKg, severe){
+  const t=severe?F75S:F75N;
+  const k=Math.floor(wKg*10/2)*2;
+  const key=Math.min(Math.max(k,26),severe?100:120);
+  return t[key]||null;
+}
+function getF100(wKg){
+  const k=Math.floor(wKg*10/2)*2;
+  const key=Math.min(Math.max(k,20),100);
+  // for >10kg calculate
+  if(wKg>10){
+    const min=Math.round(wKg*150/6/5)*5;
+    const max=Math.round(wKg*220/6/5)*5;
+    return[min,max,wKg*150,wKg*220];
+  }
+  return F100[key]||null;
+}
+function getRUTF(wKg){return RUTF.find(r=>wKg>=r[0]&&wKg<=r[1])||null}
+function getFluid(wKg){return FLUIDS.find(f=>f[0]===Math.round(wKg))||FLUIDS[FLUIDS.length-1]}
+
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+let patients=[];
+function loadData(){try{patients=JSON.parse(localStorage.getItem('ncr_v3')||'[]')}catch(e){patients=[]}}
+function saveData(){localStorage.setItem('ncr_v3',JSON.stringify(patients))}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+function fmtDate(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('en-KE',{day:'numeric',month:'short',year:'numeric'})}
+function daysBetween(d1,d2){if(!d1||!d2)return null;return Math.round((new Date(d2)-new Date(d1))/(864e5))}
+function scls(s){return s==='Active'?'ba':s==='R.I.P.'?'br2':s==='Cured/Discharged'?'bc':'bd'}
+
+// ─── WEIGHT GAIN ─────────────────────────────────────────────────────────────
+function calcWG(p){
+  const days=Object.keys(p.monitoring||{}).map(Number).sort((a,b)=>a-b);
+  let first=null,last=null,fw=null,lw=null;
+  for(const d of days){const m=p.monitoring[d];if(m&&m.wt){if(!first){first=d;fw=parseFloat(m.wt)}last=d;lw=parseFloat(m.wt)}}
+  if(!fw||!lw||first===last)return null;
+  const wg=lw-fw,rate=(wg/fw*1000)/(last-first);
+  return{wg:wg.toFixed(2),rate:rate.toFixed(1),first,last,fw,lw,days:last-first};
+}
+function wgClass(v){return v>=10?'wgg':v>=5?'wgm':'wgr'}
+function wgLabel(v){return v>=10?'✓ Good (≥10 g/kg/day)':v>=5?'⚠ Moderate (5–9 g/kg/day)':'✗ Poor (<5 g/kg/day — review management'}
+
+// ─── MUAC CLASSIFICATION ─────────────────────────────────────────────────────
+function classifyMUAC(){
+  const age=parseInt(document.getElementById('a-age')?.value)||0;
+  const muac=parseFloat(document.getElementById('a-muac')?.value)||0;
+  const el=document.getElementById('muac-class');if(!el)return;
+  if(!muac){el.style.display='none';return}
+  let cls='';let bg='';let txt='';
+  if(age<6){
+    if(muac<11.0){cls='SAM criteria';bg='var(--rp)';txt='var(--rd)'}
+    else{cls='Normal (≥11.0cm)';bg='var(--gp)';txt='var(--gd)'}
+  } else {
+    if(muac<11.5){cls='SAM — <11.5cm';bg='var(--rp)';txt='var(--rd)'}
+    else if(muac<=12.5){cls='MAM — 11.5–12.5cm';bg:'#fff8e1';txt='#b5850a'}
+    else if(muac<=13.5){cls='At risk — 12.5–13.5cm';bg:'var(--op)';txt='var(--or)'}
+    else{cls='Normal — >13.5cm';bg:'var(--gp)';txt:'var(--gd)'}
+  }
+  el.style.display='block';
+  el.style.background=bg;el.style.color=txt;el.style.border='1px solid '+bg;
+  el.textContent='MUAC classification: '+cls;
 }
 
-function saveData() {
-  localStorage.setItem('ncr_v1', JSON.stringify(patients));
+// WHZ lookup tables (WHO WFH z-scores, under 5)
+// Key: height in 0.5cm steps, value: [SAM(<-3SD), MAM(<-2SD), normal(-1SD), median, +1SD, +2SD, +3SD]
+// Simplified lookup: returns WHZ category based on weight and height
+function lookupWHZ(heightCm, weightKg, sex){
+  // Boys WFH -3SD values (approximate, every 0.5cm from 45-120cm)
+  const B3={"45":1.9,"46":2.0,"47":2.1,"48":2.3,"49":2.4,"50":2.6,"51":2.7,"52":2.9,"53":3.2,"54":3.3,"55":3.6,"56":3.9,"57":4.1,"58":4.3,"59":4.5,"60":4.7,"61":4.9,"62":5.1,"63":5.3,"64":5.5,"65":5.9,"66":6.1,"67":6.2,"68":6.4,"69":6.6,"70":6.8,"71":6.9,"72":7.1,"73":7.3,"74":7.4,"75":7.6,"76":7.7,"77":7.8,"78":8.0,"79":8.1,"80":8.2,"81":8.3,"82":8.5,"83":8.8,"84":9.0,"85":9.2,"86":9.4,"87":9.6,"88":9.8,"89":9.9,"90":10.1,"91":10.3,"92":10.5,"93":10.7,"94":10.8,"95":11.1,"96":11.3,"97":11.5,"98":11.7,"99":11.9,"100":12.0,"101":12.2,"102":12.4,"103":12.6,"104":12.8,"105":13.0,"106":13.3,"107":13.5,"108":13.7,"109":14.0,"110":14.2};
+  const B2={"45":2.0,"46":2.2,"47":2.3,"48":2.5,"49":2.7,"50":2.8,"51":3.0,"52":3.2,"53":3.5,"54":3.6,"55":3.8,"56":4.2,"57":4.5,"58":4.7,"59":4.8,"60":5.1,"61":5.3,"62":5.6,"63":5.8,"64":6.0,"65":6.3,"66":6.5,"67":6.8,"68":6.9,"69":7.1,"70":7.3,"71":7.5,"72":7.7,"73":7.9,"74":8.0,"75":8.2,"76":8.3,"77":8.4,"78":8.6,"79":8.7,"80":8.9,"81":9.1,"82":9.3,"83":9.6,"84":9.9,"85":10.2,"86":10.4,"87":10.5,"88":10.7,"89":10.8,"90":11.0,"91":11.2,"92":11.4,"93":11.7,"94":11.8,"95":12.0,"96":12.2,"97":12.6,"98":12.8,"99":12.9,"100":12.9,"101":13.0,"102":13.4,"103":13.7,"104":13.9,"105":14.1,"106":14.5,"107":14.8,"108":15.0,"109":15.1,"110":15.4};
+  // Girls WFH -3SD
+  const G3={"45":1.9,"46":2.0,"47":2.2,"48":2.3,"49":2.4,"50":2.6,"51":2.8,"52":2.9,"53":3.1,"54":3.3,"55":3.5,"56":3.7,"57":3.9,"58":4.1,"59":4.3,"60":4.5,"61":4.7,"62":4.9,"63":5.1,"64":5.3,"65":5.5,"66":5.8,"67":5.9,"68":6.1,"69":6.3,"70":6.4,"71":6.6,"72":6.7,"73":6.9,"74":7.0,"75":7.2,"76":7.3,"77":7.5,"78":7.6,"79":7.7,"80":7.9,"81":8.0,"82":8.3,"83":8.5,"84":8.6,"85":8.8,"86":9.0,"87":9.2,"88":9.4,"89":9.5,"90":9.7,"91":9.9,"92":10.1,"93":10.3,"94":10.4,"95":10.6,"96":10.8,"97":11.1,"98":11.3,"99":11.4,"100":11.6,"101":11.8,"102":12.0,"103":12.3,"104":12.5,"105":12.7,"106":13.0,"107":13.2,"108":13.5,"109":13.7,"110":14.0};
+  const G2={"45":2.1,"46":2.3,"47":2.4,"48":2.6,"49":2.7,"50":2.8,"51":3.0,"52":3.2,"53":3.4,"54":3.7,"55":3.8,"56":4.0,"57":4.3,"58":4.5,"59":4.7,"60":4.9,"61":5.1,"62":5.3,"63":5.5,"64":5.7,"65":6.1,"66":6.3,"67":6.5,"68":6.6,"69":6.8,"70":7.0,"71":7.1,"72":7.3,"73":7.5,"74":7.6,"75":7.8,"76":8.0,"77":8.1,"78":8.3,"79":8.5,"80":8.6,"81":8.8,"82":9.0,"83":9.2,"84":9.4,"85":9.6,"86":9.8,"87":10.0,"88":10.2,"89":10.4,"90":10.6,"91":10.9,"92":11.1,"93":11.2,"94":11.3,"95":11.7,"96":11.9,"97":12.2,"98":12.3,"99":12.4,"100":12.6,"101":13.0,"102":13.1,"103":13.3,"104":13.6,"105":14.0,"106":14.3,"107":14.6,"108":14.9,"109":15.1,"110":15.5};
+  const h=Math.round(heightCm).toString();
+  const t3=sex==='M'?B3:G3;const t2=sex==='M'?B2:G2;
+  const v3=t3[h];const v2=t2[h];
+  if(!v3||!v2)return null;
+  if(weightKg<v3)return{score:'<-3SD',label:'SAM',cls:'wgr'};
+  if(weightKg<v2)return{score:'-3SD to -2SD',label:'MAM',cls:'wgm'};
+  return{score:'>-2SD',label:'Normal',cls:'wgg'};
 }
 
-function toast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+function calcAdmWhz(){
+  const ht=parseFloat(document.getElementById('a-height')?.value)||0;
+  const wt=parseFloat(document.getElementById('a-weight')?.value)||0;
+  const sex=document.getElementById('a-sex2')?.value||document.getElementById('a-sex')?.value||'';
+  const el=document.getElementById('whz-auto');if(!el)return;
+  if(!ht||!wt||!sex){el.style.display='none';return}
+  const r=lookupWHZ(ht,wt,sex);
+  if(!r){el.style.display='none';return}
+  el.style.display='block';
+  el.innerHTML=`WHZ auto-classification: <strong class="${r.cls}">${r.score} — ${r.label}</strong> (height ${ht}cm, weight ${wt}kg)`;
+  // Auto-set the WHZ dropdown
+  const whzEl=document.getElementById('a-whz');
+  if(whzEl){whzEl.value=r.score==='<-3SD'?'<-3SD':'-3SD to -2SD'}
 }
 
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'patients') renderPatientList('');
-  if (name === 'dashboard') updateDashboard();
-  if (name === 'monitor' || name === 'exit') updateDropdowns();
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='patients')renderPxList('');
+  if(name==='dashboard')updateDash();
+  if(name==='monitor'||name==='exit')updateDropdowns();
 }
 
-function updateDashboard() {
-  document.getElementById('s-total').textContent = patients.length;
-  document.getElementById('s-active').textContent = patients.filter(p => p.status === 'Active').length;
-  document.getElementById('s-cured').textContent = patients.filter(p => p.status === 'Cured/Discharged').length;
-  document.getElementById('s-rip').textContent = patients.filter(p => p.status === 'R.I.P.').length;
-  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-KE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
-  const recent = [...patients].reverse().slice(0, 6);
-  const el = document.getElementById('recent-list');
-  if (!recent.length) { el.innerHTML = '<div class="empty"><p>No patients yet. Tap "Admit" to add one.</p></div>'; return; }
-  el.innerHTML = recent.map(p => patientRowHTML(p)).join('');
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function updateDash(){
+  document.getElementById('s-total').textContent=patients.length;
+  document.getElementById('s-active').textContent=patients.filter(p=>p.status==='Active').length;
+  document.getElementById('s-cured').textContent=patients.filter(p=>p.status==='Cured/Discharged').length;
+  document.getElementById('s-rip').textContent=patients.filter(p=>p.status==='R.I.P.').length;
+  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-KE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const el=document.getElementById('recent-list');
+  const recent=[...patients].reverse().slice(0,6);
+  if(!recent.length){el.innerHTML='<div class="empty"><p>No patients yet. Tap "Admit" to add one.</p></div>';return}
+  el.innerHTML=recent.map(pRowHTML).join('');
 }
-
-function patientRowHTML(p) {
-  const statusClass = p.status === 'Active' ? 'badge-active' : p.status === 'R.I.P.' ? 'badge-rip' : p.status === 'Cured/Discharged' ? 'badge-cured' : 'badge-default';
-  return `<div class="patient-item" onclick="openPatient(${p.id})">
-    <div>
-      <div class="patient-name">${p.name}</div>
-      <div class="patient-meta">${p.reg} · ${p.date} · ${p.age ? p.age + 'm' : '?'} · ${p.sex || '?'}</div>
-    </div>
-    <span class="badge ${statusClass}">${p.status}</span>
+function pRowHTML(p){
+  const phase=p.currentPhase||'P1';
+  const pb=p.status==='Active'?`<span class="badge ${phase.includes('2')?'bp2':'bp1'}" style="margin-left:4px">${phase.includes('2')?'P2':'P1'}</span>`:'';
+  return`<div class="pi" onclick="openPx(${p.id})">
+    <div><div class="pn">${p.name}${pb}</div><div class="pm">${p.reg} · ${p.date} · ${p.age?p.age+'m':'?'} · ${p.sex||'?'}</div></div>
+    <span class="badge ${scls(p.status)}">${p.status}</span>
   </div>`;
 }
-
-function renderPatientList(filter) {
-  let list = filter ? patients.filter(p => p.name.toLowerCase().includes(filter.toLowerCase()) || p.reg.toLowerCase().includes(filter.toLowerCase())) : patients;
-  const el = document.getElementById('patient-list');
-  if (!list.length) { el.innerHTML = '<div class="empty"><p>' + (filter ? 'No patients match your search.' : 'No patients admitted yet.') + '</p></div>'; return; }
-  el.innerHTML = [...list].reverse().map(p => patientRowHTML(p)).join('');
+function renderPxList(f){
+  const list=f?patients.filter(p=>p.name.toLowerCase().includes(f.toLowerCase())||p.reg.toLowerCase().includes(f.toLowerCase())):patients;
+  const el=document.getElementById('px-list');
+  if(!list.length){el.innerHTML='<div class="empty"><p>'+(f?'No patients match.':'No patients admitted yet.')+'</p></div>';return}
+  el.innerHTML=[...list].reverse().map(pRowHTML).join('');
 }
+function filterPx(v){renderPxList(v)}
 
-function filterPatients(v) { renderPatientList(v); }
+// ─── PATIENT DETAIL ───────────────────────────────────────────────────────────
+function openPx(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  const wg=calcWG(p);
+  const los=p.exit?daysBetween(p.date,p.exit.date):daysBetween(p.date,new Date().toISOString().slice(0,10));
+  const monRows=Object.entries(p.monitoring||{}).sort((a,b)=>+a[0]-+b[0]).map(([d,m])=>`
+    <div class="dr"><span class="dk">Day ${d}</span><span class="dv" style="font-size:11px">
+      ${m.wt?m.wt+'kg':''} ${m.muac?'MUAC:'+m.muac:''}
+      ${m.oedema&&m.oedema!=='0'?'Oed:'+m.oedema:''} ${m.temp?m.temp+'°C':''}
+      ${m.phase?'| '+m.phase:''} ${m.feed?'| '+m.feed:''}
+    </span></div>`).join('')||'<div style="font-size:12px;color:var(--tm);padding:8px 0">No monitoring data yet</div>';
+  const wgHtml=wg?`<div class="gbox" style="margin-top:8px">
+    <strong>Weight gain:</strong> Day ${wg.first}→Day ${wg.last}: ${wg.fw}kg→${wg.lw}kg<br>
+    Total: ${wg.wg>0?'+':''}${wg.wg}kg · Rate: <span class="${wgClass(parseFloat(wg.rate))}">${wg.rate} g/kg/day — ${wgLabel(parseFloat(wg.rate))}</span>
+  </div>`:'';
+  const exitHtml=p.exit?`
+    <div class="divider"></div>
+    <div class="ctitle" style="color:var(--gd)">1 — Discharge measurements</div>
+    ${[['Weight',p.exit.wt?p.exit.wt+' kg':'—'],['Height',p.exit.ht?p.exit.ht+' cm':'—'],['WHZ',p.exit.whz||'—'],['MUAC',p.exit.muac?p.exit.muac+' cm':'—'],['Oedema',p.exit.oedema||'—'],['Appetite',p.exit.app||'—']].map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('')}
+    <div class="divider"></div>
+    <div class="ctitle" style="color:var(--gd)">2 — Exit details</div>
+    ${[['Exit date',fmtDate(p.exit.date)],['Length of stay',p.exit.los||'—'],['Outcome',p.exit.outcome],['Via',p.exit.via||'—'],['Follow-up',fmtDate(p.exit.fu)]].map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('')}
+    <div class="divider"></div>
+    <div class="ctitle" style="color:var(--gd)">3 — Observations / comments</div>
+    <div style="font-size:12px;color:var(--tm);line-height:1.6">${p.exit.notes||'—'}</div>
+    ${p.exit.summary?`<div class="divider"></div><div class="ctitle">Discharge summary</div><div style="font-size:11px;line-height:1.7;font-family:'IBM Plex Mono',monospace;white-space:pre-wrap;background:#f9f9f9;padding:12px;border-radius:var(--r)">${p.exit.summary}</div>`:''}
+  `:'';
 
-function openPatient(id) {
-  const p = patients.find(x => x.id === id);
-  if (!p) return;
-  const statusClass = p.status === 'Active' ? 'badge-active' : p.status === 'R.I.P.' ? 'badge-rip' : p.status === 'Cured/Discharged' ? 'badge-cured' : 'badge-default';
-
-  const monSummary = Object.entries(p.monitoring || {}).filter(([,v]) => v.weight || v.muac).map(([d,v]) => `Day ${d}: ${v.weight ? v.weight+'kg' : ''} ${v.muac ? v.muac+'cm' : ''}`).join(' | ') || '—';
-
-  const html = `
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div class="modal-title" style="margin:0;">${p.name}</div>
-      <span class="badge ${statusClass}">${p.status}</span>
+  document.getElementById('modal-content').innerHTML=`
+    <div class="mhandle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="mtitle" style="margin:0">${p.name}</div>
+      <span class="badge ${scls(p.status)}">${p.status}</span>
     </div>
-    <div class="card-title">Admission details</div>
-    <div class="detail-row"><span class="detail-key">Reg. number</span><span class="detail-val">${p.reg}</span></div>
-    <div class="detail-row"><span class="detail-key">Admission date</span><span class="detail-val">${p.date}</span></div>
-    <div class="detail-row"><span class="detail-key">Age</span><span class="detail-val">${p.age ? p.age + ' months' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Sex</span><span class="detail-val">${p.sex || '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Address / phone</span><span class="detail-val">${p.phone || '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Serostatus</span><span class="detail-val">${p.sero}</span></div>
-    <div class="detail-row"><span class="detail-key">TB status</span><span class="detail-val">${p.tb}</span></div>
-    <div class="detail-row"><span class="detail-key">Admission type</span><span class="detail-val">${p.type}</span></div>
+    <div class="ctitle">Admission details</div>
+    ${[['Reg. number',p.reg],['Admission date',fmtDate(p.date)],['Age',p.age?p.age+' months':'—'],['Sex',p.sex||'—'],['Address/phone',p.phone||'—'],['Serostatus',p.sero],['TB status',p.tb],['GFD',p.gfd],['Food security',p.food],['Admission criteria',p.criteria],['Type',p.type],['Oedema at admission',p.oedema],['Complications',p.comp||'None'],['Days in facility',los?los+' days':'—']].map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('')}
     <div class="divider"></div>
-    <div class="card-title">Measurements at admission</div>
-    <div class="detail-row"><span class="detail-key">Height / length</span><span class="detail-val">${p.height ? p.height + ' cm' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Weight</span><span class="detail-val">${p.weight ? p.weight + ' kg' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">WHZ score</span><span class="detail-val">${p.whz}</span></div>
-    <div class="detail-row"><span class="detail-key">MUAC</span><span class="detail-val">${p.muac ? p.muac + ' cm' : '—'}</span></div>
+    <div class="ctitle">Measurements at admission</div>
+    ${[['Height/length',p.height?p.height+' cm':'—'],['Weight',p.weight?p.weight+' kg':'—'],['WHZ',p.whz],['MUAC',p.muac?p.muac+' cm':'—'],['Diagnosis/notes',p.diag||'—']].map(([k,v])=>`<div class="dr"><span class="dk">${k}</span><span class="dv" style="text-align:left;flex:2">${v}</span></div>`).join('')}
     <div class="divider"></div>
-    <div class="card-title">Daily monitoring</div>
-    <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">${monSummary}</div>
-    ${p.exit ? `
-    <div class="divider"></div>
-    <div class="card-title" style="color:var(--green-dark);">1 — Discharge / Transfer measurements</div>
-    <div class="detail-row"><span class="detail-key">Weight</span><span class="detail-val">${p.exit.weight ? p.exit.weight + ' kg' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Length / height</span><span class="detail-val">${p.exit.height ? p.exit.height + ' cm' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">WHZ</span><span class="detail-val">${p.exit.whz || '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">MUAC</span><span class="detail-val">${p.exit.muac ? p.exit.muac + ' cm' : '—'}</span></div>
-    <div class="divider"></div>
-    <div class="card-title" style="color:var(--green-dark);">2 — Exit details</div>
-    <div class="detail-row"><span class="detail-key">Exit date</span><span class="detail-val">${p.exit.date}</span></div>
-    <div class="detail-row"><span class="detail-key">Length of stay</span><span class="detail-val">${p.exit.los ? p.exit.los + ' days' : '—'}</span></div>
-    <div class="detail-row"><span class="detail-key">Outcome</span><span class="detail-val">${p.exit.outcome}</span></div>
-    <div class="detail-row"><span class="detail-key">Via</span><span class="detail-val">${p.exit.via || '—'}</span></div>
-    <div class="divider"></div>
-    <div class="card-title" style="color:var(--green-dark);">3 — Observations / comments</div>
-    <div style="font-size:13px; color:var(--text-muted); line-height:1.6;">${p.exit.notes || '—'}</div>
-    ` : ''}
-    <button class="btn btn-secondary" style="margin-top:20px; width:100%;" onclick="closeModal()">Close</button>
-  `;
-  document.getElementById('modal-content').innerHTML = html;
+    <div class="ctitle">Daily monitoring</div>
+    ${monRows}${wgHtml}
+    ${exitHtml}
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button class="btn bs" style="flex:1" onclick="editPx(${p.id})">Edit admission</button>
+      <button class="btn bs" style="flex:1" onclick="closeModal()">Close</button>
+    </div>`;
   document.getElementById('modal').classList.add('open');
 }
+function closeModal(){document.getElementById('modal').classList.remove('open')}
 
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-
-function admitPatient() {
-  const reg = document.getElementById('a-reg').value.trim();
-  const name = document.getElementById('a-name').value.trim();
-  const date = document.getElementById('a-date').value;
-  if (!reg || !name || !date) { toast('Please fill in Reg. number, Name, and Date.'); return; }
-  const p = {
-    id: Date.now(),
-    reg, name, date,
-    phone: document.getElementById('a-phone').value,
-    age: document.getElementById('a-age').value,
-    sex: document.getElementById('a-sex').value,
-    food: document.getElementById('a-food').value,
-    criteria: document.getElementById('a-criteria').value,
-    type: document.getElementById('a-type').value,
-    sero: document.getElementById('a-sero').value,
-    tb: document.getElementById('a-tb').value,
-    height: document.getElementById('a-height').value,
-    weight: document.getElementById('a-weight').value,
-    whz: document.getElementById('a-whz').value,
-    muac: document.getElementById('a-muac').value,
-    monitoring: {},
-    status: 'Active',
-    exit: null
+// ─── ADMIT ───────────────────────────────────────────────────────────────────
+function checkAgeAlert(){
+  const age=parseInt(document.getElementById('a-age').value)||0;
+  document.getElementById('age-alert').style.display=age>0&&age<6?'block':'none';
+}
+function admitPatient(){
+  const reg=document.getElementById('a-reg').value.trim();
+  const name=document.getElementById('a-name').value.trim();
+  const date=document.getElementById('a-date').value;
+  if(!reg||!name||!date){toast('Please fill Reg. number, Name, and Date');return}
+  const data={
+    reg,name,date,
+    phone:document.getElementById('a-phone').value,
+    age:document.getElementById('a-age').value,
+    sex:document.getElementById('a-sex').value,
+    gfd:document.getElementById('a-gfd').value,
+    food:document.getElementById('a-food').value,
+    criteria:document.getElementById('a-criteria').value,
+    type:document.getElementById('a-type').value,
+    oedema:document.getElementById('a-oedema').value,
+    sero:document.getElementById('a-sero').value,
+    tb:document.getElementById('a-tb').value,
+    height:document.getElementById('a-height').value,
+    weight:document.getElementById('a-weight').value,
+    whz:document.getElementById('a-whz').value,
+    muac:document.getElementById('a-muac').value,
+    comp:document.getElementById('a-comp').value,
+    diag:document.getElementById('a-diag').value,
+    status:'Active',currentPhase:'P1',monitoring:{},exit:null
   };
-  patients.push(p);
+  if(window._editId){
+    const idx=patients.findIndex(x=>x.id===window._editId);
+    if(idx>-1){data.id=window._editId;data.monitoring=patients[idx].monitoring;data.exit=patients[idx].exit;data.status=patients[idx].status;data.currentPhase=patients[idx].currentPhase;patients[idx]=data}
+    window._editId=null;
+    document.getElementById('admit-btn-txt').textContent='Admit patient';
+    toast('✓ Patient record updated');
+  }else{
+    data.id=Date.now();patients.push(data);toast('✓ Patient admitted successfully');
+  }
   saveData();
-  toast('✓ Patient admitted successfully');
-  ['a-reg','a-name','a-phone','a-age','a-height','a-weight','a-muac'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('a-date').value = new Date().toISOString().slice(0,10);
-  ['a-sex','a-food','a-criteria','a-type','a-sero','a-tb','a-whz'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  ['a-reg','a-name','a-phone','a-age','a-height','a-weight','a-muac','a-diag'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('age-alert').style.display='none';
+}
+function editPx(id){
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  closeModal();
+  const btn=document.querySelectorAll('.ni')[1];
+  showPage('admit',btn);
+  setTimeout(()=>{
+    ['reg','name','phone','age','height','weight','muac','diag'].forEach(f=>{const el=document.getElementById('a-'+f);if(el)el.value=p[f]||''});
+    ['date','gfd','food','criteria','type','oedema','sero','tb','whz','comp'].forEach(f=>{const el=document.getElementById('a-'+f);if(el)el.value=p[f]||el.options[0].value});
+    window._editId=id;
+    document.getElementById('admit-btn-txt').textContent='Save changes';
+    checkAgeAlert();
+    toast('Editing '+p.name+' — make changes and save');
+  },100);
 }
 
-function updateDropdowns() {
-  const active = patients.filter(p => p.status === 'Active');
-  const opts = '<option value="">— select a patient —</option>' + active.map(p => `<option value="${p.id}">${p.name} (${p.reg})</option>`).join('');
-  document.getElementById('monitor-patient').innerHTML = opts;
-  document.getElementById('exit-patient').innerHTML = '<option value="">— select a patient —</option>' + patients.map(p => `<option value="${p.id}">${p.name} (${p.reg}) — ${p.status}</option>`).join('');
+// ─── DROPDOWNS ───────────────────────────────────────────────────────────────
+function updateDropdowns(){
+  const active=patients.filter(p=>p.status==='Active');
+  const opts='<option value="">— select a patient —</option>'+active.map(p=>`<option value="${p.id}">${p.name} (${p.reg})</option>`).join('');
+  document.getElementById('mon-px').innerHTML=opts;
+  document.getElementById('ex-px').innerHTML='<option value="">— select a patient —</option>'+patients.map(p=>`<option value="${p.id}">${p.name} (${p.reg}) — ${p.status}</option>`).join('');
 }
 
-function loadMonitor() {
-  const id = parseInt(document.getElementById('monitor-patient').value);
-  const p = patients.find(x => x.id === id);
-  const area = document.getElementById('monitor-area');
-  if (!p) { area.style.display = 'none'; return; }
-  area.style.display = 'block';
-  document.getElementById('monitor-name').textContent = p.name + ' — ' + p.reg;
-  const rows = document.getElementById('day-rows');
-  rows.innerHTML = Array.from({length:12}, (_,i) => {
-    const d = i + 1;
-    const m = p.monitoring[d] || {};
-    return `<div class="monitor-row">
-      <span class="monitor-day">D${d}</span>
-      <div class="monitor-inputs">
-        <input type="number" step="0.01" placeholder="Weight" value="${m.weight || ''}" onchange="setMonitor(${id},${d},'weight',this.value)">
-        <input type="number" step="0.1" placeholder="MUAC" value="${m.muac || ''}" onchange="setMonitor(${id},${d},'muac',this.value)">
-      </div>
-    </div>`;
+// ─── MONITOR ─────────────────────────────────────────────────────────────────
+let _monId=null,_monDay=1;
+
+function loadMonitor(){
+  _monId=parseInt(document.getElementById('mon-px').value)||null;
+  const p=patients.find(x=>x.id===_monId);
+  const area=document.getElementById('mon-area');
+  if(!p){area.style.display='none';return}
+  area.style.display='block';
+  const phase=p.currentPhase||'P1';
+  const pb=document.getElementById('mon-phasebar');
+  pb.className='phasebar '+(phase==='P2'?'p2':phase==='TR'?'p2':'p1');
+  const phaseLabels={'P1':'<strong>Phase 1 — Stabilisation:</strong> F-75 cautious feeding. 2-hourly Day 1, then 3-hourly, then 4-hourly.','TR':'<strong>Transition:</strong> Switch to F-100 at same volume as F-75. Increase by 10ml per feed as tolerated.','P2':'<strong>Phase 2 — Rehabilitation:</strong> F-100 freely (150–220 kcal/kg/day). Target ≥10 g/kg/day weight gain.'};
+  pb.innerHTML=phaseLabels[phase]||phaseLabels['P1'];
+  document.getElementById('mon-pname').textContent=p.name+' — '+p.reg+(p.age&&parseInt(p.age)<6?' ⚠ UNDER 6 MONTHS':'');
+  _monDay=Math.max(1,Object.keys(p.monitoring||{}).length+1);
+  if(_monDay>12)_monDay=12;
+  renderDayTabs(p);
+  renderDayForm(p,_monDay);
+  showCalc('f75',document.querySelector('.tab-btn.active'));
+  renderWG(p);
+}
+
+function renderDayTabs(p){
+  const tabs=document.getElementById('day-tabs');
+  const days=Object.keys(p.monitoring||{}).map(Number);
+  tabs.innerHTML=Array.from({length:12},(_,i)=>{
+    const d=i+1;
+    const has=days.includes(d)&&(p.monitoring[d].wt||p.monitoring[d].feed);
+    return`<button class="tab-btn ${d===_monDay?'active':''}" onclick="switchDay(${d},this)" style="${has?'border-color:var(--gl);color:var(--gd)':''}">${d===_monDay?'Day '+d:'D'+d}</button>`;
   }).join('');
 }
 
-function setMonitor(pid, day, field, value) {
-  const p = patients.find(x => x.id === pid);
-  if (!p) return;
-  if (!p.monitoring[day]) p.monitoring[day] = {};
-  p.monitoring[day][field] = value;
+function switchDay(d,btn){
+  const p=patients.find(x=>x.id===_monId);if(!p)return;
+  _monDay=d;
+  document.querySelectorAll('#day-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDayForm(p,d);
 }
 
-function saveMonitor() {
-  saveData();
-  toast('✓ Monitoring data saved');
+function renderDayForm(p,d){
+  const m=p.monitoring[d]||{};
+  const isUnder6=p.age&&parseInt(p.age)<6;
+  // Pre-fill Day 1 weight from admission if not yet entered
+  const admWt=(d===1&&!m.wt&&p.weight)?p.weight:'';
+  const wtVal=m.wt||admWt;
+  const admMuac=(d===1&&!m.muac&&p.muac)?p.muac:'';
+  const muacVal=m.muac||admMuac;
+
+  document.getElementById('day-form').innerHTML=`
+    <div class="sh">Day ${d} — Measurements${d===1?' (pre-filled from admission)':''}</div>
+    <div class="fr">
+      <div class="fg"><label>Weight (kg)</label><input type="number" step="0.01" placeholder="kg" value="${wtVal}" id="m-wt" oninput="autoSaveMon()"></div>
+      <div class="fg"><label>MUAC (cm)</label><input type="number" step="0.1" placeholder="cm" value="${muacVal}" id="m-muac" oninput="autoSaveMon();showMuacClass()"></div>
+    </div>
+    <div id="m-muac-class" style="margin-top:-8px;margin-bottom:8px;font-size:12px;${m.muacClass?'display:block':'display:none'}"><span style="color:${m.muacClass&&m.muacClass.includes('SAM')?'var(--rd)':m.muacClass&&m.muacClass.includes('MAM')?'var(--or)':'var(--gd)'}">${m.muacClass||''}</span></div>
+    <div class="fr">
+      <div class="fg"><label>Oedema grade</label>
+        <select id="m-oedema" onchange="autoSaveMon()">
+          <option value="0" ${(m.oedema||'0')==='0'?'selected':''}>0 — None</option>
+          <option value="+" ${m.oedema==='+'?'selected':''}>+ Mild</option>
+          <option value="++" ${m.oedema==='++'?'selected':''}>++ Moderate</option>
+          <option value="+++" ${m.oedema==='+++'?'selected':''}>+++ Severe</option>
+        </select>
+      </div>
+      <div class="fg"><label>Current phase</label>
+        <select id="m-phase" onchange="autoSaveMon()">
+          <option value="P1" ${(m.phase||p.currentPhase||'P1')==='P1'?'selected':''}>Phase 1 — Stabilisation</option>
+          <option value="TR" ${(m.phase||p.currentPhase)==='TR'?'selected':''}>Transition</option>
+          <option value="P2" ${(m.phase||p.currentPhase)==='P2'?'selected':''}>Phase 2 — Rehabilitation</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="sh">Day ${d} — Feeding</div>
+    ${isUnder6?'<div class="wbox" style="margin-bottom:10px">⚠ Under 6 months: Expressed breast milk first, then diluted F-100 or F-75. Do NOT give full-strength F-100.</div>':''}
+    <div class="fr">
+      <div class="fg"><label>Therapeutic feed</label>
+        <select id="m-feed" onchange="autoSaveMon()">
+          <option value="F-75 (2-hourly)" ${(m.feed||'F-75 (2-hourly)')==='F-75 (2-hourly)'?'selected':''}>F-75 — 2-hourly (Day 1)</option>
+          <option value="F-75 (3-hourly)" ${m.feed==='F-75 (3-hourly)'?'selected':''}>F-75 — 3-hourly</option>
+          <option value="F-75 (4-hourly)" ${m.feed==='F-75 (4-hourly)'?'selected':''}>F-75 — 4-hourly</option>
+          <option value="F-100 (transition)" ${m.feed==='F-100 (transition)'?'selected':''}>F-100 — Transition</option>
+          <option value="F-100 (free feeding)" ${m.feed==='F-100 (free feeding)'?'selected':''}>F-100 — Free feeding (Phase 2)</option>
+          <option value="RUTF" ${m.feed==='RUTF'?'selected':''}>RUTF</option>
+          ${isUnder6?`<option value="Diluted F-100" ${m.feed==='Diluted F-100'?'selected':''}>Diluted F-100 (&lt;6 months)</option>`:''}
+          <option value="Breast milk" ${m.feed==='Breast milk'?'selected':''}>Breast milk only</option>
+          <option value="Breast milk + supplement" ${m.feed==='Breast milk + supplement'?'selected':''}>Breast milk + supplement</option>
+          <option value="F-75 via NG" ${m.feed==='F-75 via NG'?'selected':''}>F-75 via NG tube</option>
+          <option value="IV + F-75" ${m.feed==='IV + F-75'?'selected':''}>IV fluids + F-75</option>
+        </select>
+      </div>
+      <div class="fg"><label>Feeding method</label>
+        <select id="m-method" onchange="autoSaveMon()">
+          <option value="Oral" ${(m.method||'Oral')==='Oral'?'selected':''}>Oral (cup)</option>
+          <option value="NG tube" ${m.method==='NG tube'?'selected':''}>NG tube</option>
+          <option value="Oral + NG" ${m.method==='Oral + NG'?'selected':''}>Oral + NG</option>
+          <option value="IV" ${m.method==='IV'?'selected':''}>IV fluids</option>
+          <option value="IV + oral" ${m.method==='IV + oral'?'selected':''}>IV + oral</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Total offered (ml)</label><input type="number" placeholder="ml" value="${m.offered||''}" id="m-offered" oninput="autoSaveMon()"></div>
+      <div class="fg"><label>Total taken (ml)</label><input type="number" placeholder="ml" value="${m.taken||''}" id="m-taken" oninput="calcIntake()"></div>
+    </div>
+    <div id="intake-check" style="margin-top:-8px;margin-bottom:12px;font-size:12px"></div>
+
+    <div class="sh">Day ${d} — Fluid management (if shock / dehydration)</div>
+    <div class="fg"><label>Dehydration / fluid status</label>
+      <select id="m-dehy" onchange="showFluidPlan()">
+        <option value="None" ${(m.dehy||'None')==='None'?'selected':''}>None / resolved</option>
+        <option value="Shock" ${m.dehy==='Shock'?'selected':''}>SHOCK — IV Ringer's lactate + 5% dextrose</option>
+        <option value="Dehydration — ReSoMal" ${m.dehy==='Dehydration — ReSoMal'?'selected':''}>Dehydration (no shock) — ReSoMal oral/NG</option>
+        <option value="Monitoring" ${m.dehy==='Monitoring'?'selected':''}>Monitoring only</option>
+      </select>
+    </div>
+    <div id="fluid-plan" style="display:none" class="wbox" style="font-size:12px"></div>
+
+    <div class="sh">Day ${d} — Clinical notes</div>
+    <div class="fg"><textarea id="m-notes" rows="3" placeholder="Clinical observations, treatment changes, response to feeding, concerns, medications given..." oninput="autoSaveMon()">${m.notes||''}</textarea></div>
+    <button class="btn bp" onclick="saveDayMon()" style="margin-top:4px">💾 Save Day ${d} data</button>
+  `;
+
+  // Auto-save the pre-filled Day 1 values
+  if(d===1&&(admWt||admMuac))setTimeout(autoSaveMon,100);
+  calcIntake();
+  showFluidPlan();
 }
 
-function recordExit() {
-  const id = parseInt(document.getElementById('exit-patient').value);
-  const outcome = document.getElementById('e-outcome').value;
-  const date = document.getElementById('e-date').value;
-  if (!id || !outcome || !date) { toast('Please select a patient, date, and outcome.'); return; }
-  const p = patients.find(x => x.id === id);
-  if (!p) return;
-  p.status = outcome;
-  p.exit = {
-    date, outcome,
-    los: document.getElementById('e-los').value,
-    weight: document.getElementById('e-weight').value,
-    height: document.getElementById('e-height').value,
-    whz: document.getElementById('e-whz').value,
-    muac: document.getElementById('e-muac').value,
-    via: document.getElementById('e-via').value,
-    notes: document.getElementById('e-notes').value
+function showFluidPlan(){
+  const sel=document.getElementById('m-dehy');
+  const el=document.getElementById('fluid-plan');
+  if(!sel||!el)return;
+  const v=sel.value;
+  const p=patients.find(x=>x.id===_monId);
+  const wKg=p&&p.weight?parseFloat(p.weight):null;
+  if(v==='None'||v==='Monitoring'){el.style.display='none';autoSaveMon();return}
+  el.style.display='block';
+  if(v==='Shock'){
+    const f=wKg?FLUIDS.find(r=>r[0]===Math.round(wKg)):null;
+    el.innerHTML=`<strong>⚠ SHOCK PROTOCOL — Ringer's Lactate with 5% Dextrose</strong><br>
+    ${f?`For ${wKg}kg: Give <strong>${f[1]} ml</strong> IV over 2 hours (${f[2]} drops/min adult IV set)<br>`:'Enter admission weight to get exact volumes<br>'}
+    If severe anaemia: <strong>Blood transfusion first</strong>, NOT Ringer's<br><br>
+    <strong>After shock resolved → 12-hour plan:</strong><br>
+    • ReSoMal 7.5 ml/kg/hr for 1 hour<br>
+    • Then alternate ReSoMal and F-75 at 7.5 ml/kg for up to 10 hours<br>
+    • At 12 hours: switch to 3-hourly F-75 feeds<br>
+    ${f?`Oral/NG amount: <strong>${f[3]} ml</strong> per feed`:''}`;
+  } else {
+    const f=wKg?FLUIDS.find(r=>r[0]===Math.round(wKg)):null;
+    el.innerHTML=`<strong>Dehydration (no shock) — ReSoMal plan:</strong><br>
+    Give ReSoMal 10 ml/kg/hr for 2 hours (oral or NG)<br>
+    ${f?`For ${wKg}kg: <strong>${f[3]*1.3|0} ml</strong> over 2 hours<br>`:''}
+    Then: 7.5 ml/kg alternating with F-75 for up to 10 hours<br>
+    At 12 hours: switch to 3-hourly F-75 oral feeds`;
+  }
+  autoSaveMon();
+}
+
+function calcIntake(){
+  const offered=parseFloat(document.getElementById('m-offered')?.value)||0;
+  const taken=parseFloat(document.getElementById('m-taken')?.value)||0;
+  const el=document.getElementById('intake-check');if(!el)return;
+  if(!offered||!taken){el.textContent='';return}
+  const pct=Math.round(taken/offered*100);
+  const cls=pct>=80?'color:var(--gd)':pct>=50?'color:var(--or)':'color:var(--rd)';
+  el.innerHTML=`<span style="${cls}"><strong>${pct}%</strong> of prescribed diet taken ${pct>=80?'✓ Sufficient (≥80%)':pct>=50?'⚠ Below 80% — consider NG tube if 2–3 consecutive feeds':'✗ Poor intake — NG tube may be needed'}</span>`;
+  autoSaveMon();
+}
+
+function showMuacClass(){
+  const p=patients.find(x=>x.id===_monId);if(!p)return;
+  const age=parseInt(p.age)||0;
+  const muac=parseFloat(document.getElementById('m-muac')?.value)||0;
+  const el=document.getElementById('m-muac-class');if(!el)return;
+  if(!muac){el.style.display='none';return}
+  let cls='';let color='';
+  if(age<6){cls=muac<11.0?'SAM criteria — <11.0cm':'Normal — ≥11.0cm';color=muac<11.0?'var(--rd)':'var(--gd)'}
+  else{cls=muac<11.5?'SAM — <11.5cm':muac<=12.5?'MAM — 11.5–12.5cm':muac<=13.5?'At risk — 12.5–13.5cm':'Normal — >13.5cm';color=muac<11.5?'var(--rd)':muac<=12.5?'var(--or)':muac<=13.5?'#b5850a':'var(--gd)'}
+  el.style.display='block';el.style.color=color;
+  el.innerHTML='<strong>MUAC: '+cls+'</strong>';
+}
+
+function autoSaveMon(){
+  const p=patients.find(x=>x.id===_monId);if(!p)return;
+  const d=_monDay;
+  if(!p.monitoring[d])p.monitoring[d]={};
+  const m=p.monitoring[d];
+  const g=id=>{const el=document.getElementById(id);return el?el.value:''};
+  m.wt=g('m-wt');m.muac=g('m-muac');m.oedema=g('m-oedema');
+  m.phase=g('m-phase');m.dehy=g('m-dehy');
+  m.feed=g('m-feed');m.method=g('m-method');m.offered=g('m-offered');m.taken=g('m-taken');
+  m.stim=g('m-stim');m.edu=g('m-edu');m.notes=g('m-notes');
+  p.currentPhase=m.phase||p.currentPhase;
+  renderWG(p);
+}
+
+function saveDayMon(){
+  autoSaveMon();saveData();
+  toast('✓ Day '+_monDay+' saved');
+  const p=patients.find(x=>x.id===_monId);if(p)renderDayTabs(p);
+}
+
+function renderWG(p){
+  const wg=calcWG(p);
+  const el=document.getElementById('wg-area');if(!el)return;
+  if(!wg){el.innerHTML='<div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see analysis</p></div>';return}
+  const r=parseFloat(wg.rate);
+  el.innerHTML=`
+    <div class="dr"><span class="dk">Period</span><span class="dv">Day ${wg.first} → Day ${wg.last} (${wg.days} days)</span></div>
+    <div class="dr"><span class="dk">Weight</span><span class="dv">${wg.fw} kg → ${wg.lw} kg</span></div>
+    <div class="dr"><span class="dk">Total change</span><span class="dv ${r>=0?'wgg':'wgr'}">${wg.wg>0?'+':''}${wg.wg} kg</span></div>
+    <div class="dr"><span class="dk">Rate g/kg/day</span><span class="dv"><span class="${wgClass(r)}">${wg.rate} — ${wgLabel(r)}</span></span></div>
+    <div class="dr" style="border:none;margin-top:4px"><span style="font-size:11px;color:var(--tm)">Phase 2 target: ≥10 g/kg/day. Failure to respond: &lt;5 g/kg/day for 2 consecutive weeks.</span></div>`;
+}
+
+// ─── CALCULATORS ─────────────────────────────────────────────────────────────
+let _calcTab='f75';
+function showCalc(tab,btn){
+  _calcTab=tab;
+  document.querySelectorAll('#fluid-card .tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const p=patients.find(x=>x.id===_monId);
+  const wKg=p&&p.weight?parseFloat(p.weight):null;
+  const oedema=p?p.oedema||'0':'0';
+  const el=document.getElementById('calc-area');
+  if(tab==='f75')renderF75Calc(el,wKg,oedema);
+  else if(tab==='f100')renderF100Calc(el,wKg);
+  else if(tab==='rutf')renderRUTFCalc(el,wKg);
+  else renderFluidCalc(el,wKg);
+}
+
+function renderF75Calc(el,wKg,oedema){
+  const severe=oedema==='+++';
+  const isUnder6=patients.find(x=>x.id===_monId)?.age<6;
+  if(!wKg){el.innerHTML='<div class="ibox">Weight required to calculate F-75 amounts. Enter weight at admission.</div>';return}
+  const r=getF75(wKg,severe);
+  if(!r){el.innerHTML='<div class="ibox">Weight out of range for F-75 reference card.</div>';return}
+  el.innerHTML=`
+    <div class="gbox">Using <strong>${severe?'Severe (+++) oedema':'Normal (0/+/++) oedema'}</strong> F-75 table for ${wKg} kg</div>
+    ${isUnder6?'<div class="wbox">Under 6 months: Use diluted F-100 or F-75. Not full-strength F-100.</div>':''}
+    <div class="calc-box">
+      <div class="calc-title">F-75 amounts per feed (130 ml/kg/day = 100 kcal/kg/day)</div>
+      <div class="calc-row"><span>2-hourly (12 feeds/day) — Day 1</span><span><strong>${r[0]} ml</strong></span></div>
+      <div class="calc-row"><span>3-hourly (8 feeds/day) — when stable</span><span><strong>${r[1]} ml</strong></span></div>
+      <div class="calc-row"><span>4-hourly (6 feeds/day) — progressing</span><span><strong>${r[2]} ml</strong></span></div>
+      <div class="calc-row"><span>Daily total</span><span><strong>${r[3]} ml</strong></span></div>
+      <div class="calc-row"><span>80% minimum (NG if below)</span><span><strong>${r[4]} ml</strong></span></div>
+    </div>
+    <div class="ibox" style="margin-top:8px">
+      <strong>When to change frequency:</strong><br>
+      2hr→3hr: Little/no vomiting, diarrhoea &lt;5/day, finishing most feeds<br>
+      3hr→4hr: No vomiting, less diarrhoea, finishing most feeds<br>
+      <strong>NG tube if:</strong> Taking &lt;80% orally for 2–3 consecutive feeds
+    </div>`;
+}
+
+function renderF100Calc(el,wKg){
+  if(!wKg){el.innerHTML='<div class="ibox">Weight required to calculate F-100 amounts.</div>';return}
+  const r=getF100(wKg);
+  if(!r){el.innerHTML='<div class="ibox">Unable to calculate.</div>';return}
+  el.innerHTML=`
+    <div class="calc-box">
+      <div class="calc-title">F-100 free feeding — Phase 2 (6 feeds/day, 4-hourly)</div>
+      <div class="calc-row"><span>Min per feed (150 kcal/kg/day)</span><span><strong>${r[0]} ml</strong></span></div>
+      <div class="calc-row"><span>Max per feed (220 kcal/kg/day)</span><span><strong>${r[1]} ml</strong></span></div>
+      <div class="calc-row"><span>Daily minimum</span><span><strong>${Math.round(r[2])} ml</strong></span></div>
+      <div class="calc-row"><span>Daily maximum</span><span><strong>${Math.round(r[3])} ml</strong></span></div>
+    </div>
+    <div class="ibox" style="margin-top:8px">
+      Feed freely — offer as much as child wants within range.<br>
+      If still hungry after completing feed, offer more (up to max).<br>
+      Increase each feed by 10 ml if finishing all feeds.<br>
+      <strong>RUTF equivalent:</strong> 100 ml F-100 ≈ 20g RUTF (1 sachet = 500 ml F-100)
+    </div>`;
+}
+
+function renderRUTFCalc(el,wKg){
+  if(!wKg){el.innerHTML='<div class="ibox">Weight required to calculate RUTF ration.</div>';return}
+  const r=getRUTF(wKg);
+  if(!r){el.innerHTML='<div class="ibox">Weight out of RUTF range.</div>';return}
+  el.innerHTML=`
+    <div class="calc-box">
+      <div class="calc-title">RUTF daily ration for ${wKg} kg (${r[0]}–${r[1]} kg range)</div>
+      <div class="calc-row"><span>Plumpy'nut sachets/day</span><span><strong>${r[2]} sachets</strong></span></div>
+      <div class="calc-row"><span>BP-100 bars/day</span><span><strong>${r[3]} bars</strong></span></div>
+      <div class="calc-row"><span>Energy</span><span><strong>${r[2]*500} kcal/day</strong></span></div>
+    </div>
+    <div class="ibox" style="margin-top:8px">
+      Give full day's RUTF to caregiver. Check intake 5 times/day.<br>
+      If not taking sufficient RUTF, give F-100 to make up deficit.<br>
+      Always offer water during and after RUTF.<br>
+      <strong>Do NOT give iron</strong> when child is on RUTF (already contains iron).
+    </div>`;
+}
+
+function renderFluidCalc(el,wKg){
+  const w=wKg?Math.round(wKg):null;
+  const rows=FLUIDS.map(f=>`<tr class="${w&&f[0]===w?'highlight':''}">
+    <td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td>
+  </tr>`).join('');
+  el.innerHTML=`
+    <div class="wbox">Use this table for SAM with diarrhoea and shock. For severe anaemia: urgent blood transfusion, NOT Ringer's.</div>
+    <div style="font-size:12px;margin-bottom:8px">
+      <strong>If SHOCK:</strong> Ringer's lactate + 5% dextrose 20 ml/kg over 2 hrs (IV)<br>
+      <strong>If NOT shock (or after shock):</strong> ReSoMal 10 ml/kg/hr x2hr, then 7.5 ml/kg alternate with F-75 for 10 hrs
+    </div>
+    <table class="fluid-table">
+      <tr><th>Wt (kg)</th><th>IV Shock (ml)</th><th>IV Drops/min</th><th>Oral/NG (ml)</th></tr>
+      ${rows}
+    </table>
+    ${w?`<div class="gbox" style="margin-top:8px">For ${w} kg: IV shock = <strong>${FLUIDS.find(f=>f[0]===w)?.[1]||'—'} ml</strong> over 2hrs · Oral/NG = <strong>${FLUIDS.find(f=>f[0]===w)?.[3]||'—'} ml</strong></div>`:''}`;
+}
+
+// ─── EXIT ─────────────────────────────────────────────────────────────────────
+function prefillExit(){
+  document.getElementById('e-date').value=new Date().toISOString().slice(0,10);
+  calcLOS();calcExitMetrics();
+}
+function calcLOS(){
+  const id=parseInt(document.getElementById('ex-px').value);
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  const ed=document.getElementById('e-date').value;
+  if(!ed||!p.date)return;
+  const los=daysBetween(p.date,ed);
+  document.getElementById('e-los').value=los!==null?los+' days':'';
+  document.getElementById('a-los').value='';
+}
+function calcExitMetrics(){
+  const id=parseInt(document.getElementById('ex-px').value);
+  const p=patients.find(x=>x.id===id);if(!p||!p.weight)return;
+  const admWt=parseFloat(p.weight);
+  const exitWt=parseFloat(document.getElementById('e-wt').value)||0;
+  const exitMuac=parseFloat(document.getElementById('e-muac').value)||0;
+  const los=parseInt(document.getElementById('e-los').value)||0;
+  const el=document.getElementById('exit-metrics');
+  if(!exitWt){el.style.display='none';return}
+  el.style.display='block';
+  const wc=exitWt-admWt;
+  const pct=(wc/admWt*100).toFixed(1);
+  let html=`Adm: <strong>${admWt} kg</strong> → Discharge: <strong>${exitWt} kg</strong> (<strong style="color:${wc>=0?'var(--gd)':'var(--rd)'}">${wc>0?'+':''}${wc.toFixed(2)} kg / ${pct>0?'+':''}${pct}%</strong>)<br>`;
+  if(los>0){const r=((wc/admWt)*1000/los).toFixed(1);html+=`Rate: <span class="${wgClass(parseFloat(r))}">${r} g/kg/day</span><br>`}
+  if(exitMuac)html+=`Discharge MUAC: <strong>${exitMuac} cm</strong> ${exitMuac>=12.5?'✓ ≥12.5cm':exitMuac>=11.5?'⚠ 11.5–12.4cm':'✗ <11.5cm'}`;
+  el.innerHTML=html;
+}
+function recordExit(){
+  const id=parseInt(document.getElementById('ex-px').value);
+  const outcome=document.getElementById('e-out').value;
+  const date=document.getElementById('e-date').value;
+  if(!id||!outcome||!date){toast('Please select patient, date, and outcome');return}
+  const p=patients.find(x=>x.id===id);if(!p)return;
+  p.status=outcome;
+  p.exit={
+    date,outcome,
+    los:document.getElementById('e-los').value,
+    wt:document.getElementById('e-wt').value,
+    ht:document.getElementById('e-ht').value,
+    whz:document.getElementById('e-whz').value,
+    muac:document.getElementById('e-muac').value,
+    oedema:document.getElementById('e-oedema').value,
+    app:document.getElementById('e-app').value,
+    via:document.getElementById('e-via').value,
+    fu:document.getElementById('e-fu').value,
+    inst:document.getElementById('e-inst').value,
+    notes:document.getElementById('e-notes').value,
   };
+  p.exit.summary=genSummary(p);
   saveData();
-  toast('✓ Exit recorded');
-  ['e-date','e-los','e-weight','e-height','e-whz','e-muac','e-via'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('e-notes').value = '';
-  document.getElementById('e-outcome').selectedIndex = 0;
-  document.getElementById('exit-patient').selectedIndex = 0;
+  toast('✓ Exit recorded — discharge summary generated');
+  ['e-wt','e-ht','e-muac','e-via','e-fu','e-notes'].forEach(i=>document.getElementById(i).value='');
+  ['e-whz','e-oedema','e-app','e-out','e-inst'].forEach(i=>document.getElementById(i).selectedIndex=0);
+  document.getElementById('e-los').value='';
+  document.getElementById('exit-metrics').style.display='none';
+  setTimeout(()=>openPx(id),300);
+}
+function genSummary(p){
+  const wg=calcWG(p);
+  const admWt=parseFloat(p.weight)||0;
+  const exWt=parseFloat(p.exit.wt)||0;
+  const wc=exWt?((exWt-admWt).toFixed(2)):'—';
+  return`DISCHARGE SUMMARY — MOH 368
+Facility: _______________________ Date: ${fmtDate(p.exit.date)}
+
+PATIENT
+Name: ${p.name} | Reg: ${p.reg} | Age: ${p.age?p.age+' months':'—'} | Sex: ${p.sex||'—'}
+Address/Phone: ${p.phone||'—'}
+
+ADMISSION (${fmtDate(p.date)})
+Type: ${p.type} | Criteria: ${p.criteria}
+Serostatus: ${p.sero} | TB: ${p.tb}
+GFD: ${p.gfd} | Food Security: ${p.food}
+Wt: ${p.weight?p.weight+' kg':'—'} | Ht: ${p.height?p.height+' cm':'—'} | WHZ: ${p.whz} | MUAC: ${p.muac?p.muac+' cm':'—'}
+Oedema: ${p.oedema} | Complications: ${p.comp||'None'}
+Diagnosis: ${p.diag||'—'}
+
+DISCHARGE (${fmtDate(p.exit.date)})
+Outcome: ${p.exit.outcome} | Length of stay: ${p.exit.los||'—'}
+Wt: ${p.exit.wt?p.exit.wt+' kg':'—'} (change: ${wc} kg) | Ht: ${p.exit.ht?p.exit.ht+' cm':'—'}
+WHZ: ${p.exit.whz||'—'} | MUAC: ${p.exit.muac?p.exit.muac+' cm':'—'} | Oedema: ${p.exit.oedema||'—'}
+${wg?'Weight gain rate: '+wg.rate+' g/kg/day':''}
+Via: ${p.exit.via||'—'} | Follow-up: ${fmtDate(p.exit.fu)}
+Instructions given: ${p.exit.inst||'—'}
+Notes: ${p.exit.notes||'—'}`;
 }
 
-function updateConnStatus() {
-  const badge = document.getElementById('conn-badge');
-  const text = document.getElementById('conn-text');
-  if (navigator.onLine) { badge.classList.add('online'); text.textContent = 'Online'; }
-  else { badge.classList.remove('online'); text.textContent = 'Offline'; }
+// ─── CONNECTIVITY ─────────────────────────────────────────────────────────────
+function updConn(){const b=document.getElementById('cbadge'),t=document.getElementById('ctxt');if(navigator.onLine){b.classList.add('on');t.textContent='Online'}else{b.classList.remove('on');t.textContent='Offline'}}
+window.addEventListener('online',updConn);window.addEventListener('offline',updConn);
+
+// ─── PIN ──────────────────────────────────────────────────────────────────────
+const PK='ncr_pin3';const LT=5*60*1000;const MA=5;
+let pb2='',pm='unlock',npt='',att=0,lt=null,lu=0;
+function getP(){return localStorage.getItem(PK)||null}function setP(p){localStorage.setItem(PK,p)}
+function initPin(){
+  if(!getP()){pm='setup';document.getElementById('pin-title').textContent='Create your PIN';document.getElementById('pin-sub').textContent='Choose a 4-digit PIN';document.getElementById('pin-change').style.display='none'}
+  else{pm='unlock';document.getElementById('pin-title').textContent='Enter PIN';document.getElementById('pin-sub').textContent='MOH Inpatient Nutrition Register';document.getElementById('pin-change').style.display='block'}
+  document.getElementById('pin-screen').classList.remove('hidden');pb2='';rdots();
 }
-
-window.addEventListener('online', updateConnStatus);
-window.addEventListener('offline', updateConnStatus);
-
-loadData();
-updateDashboard();
-updateConnStatus();
-document.getElementById('a-date').value = new Date().toISOString().slice(0,10);
-document.getElementById('e-date').value = new Date().toISOString().slice(0,10);
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+function rdots(){for(let i=0;i<4;i++){const d=document.getElementById('d'+i);d.classList.remove('filled','error');if(i<pb2.length)d.classList.add('filled')}}
+function pinKey(k){if(Date.now()<lu)return;if(pb2.length>=4)return;pb2+=k;rdots();document.getElementById('pin-err').textContent='';if(pb2.length===4)setTimeout(hp,120)}
+function pinDel(){pb2=pb2.slice(0,-1);rdots()}
+function hp(){
+  if(pm==='setup'){npt=pb2;pb2='';pm='setup-confirm';document.getElementById('pin-title').textContent='Confirm PIN';document.getElementById('pin-sub').textContent='Enter the same PIN again';rdots();return}
+  if(pm==='setup-confirm'){if(pb2===npt){setP(pb2);unlockApp();toast('✓ PIN set')}else{perr('PINs do not match');pm='setup';npt='';document.getElementById('pin-title').textContent='Create your PIN'}return}
+  if(pm==='change-old'){if(pb2===getP()){pb2='';pm='change-new';document.getElementById('pin-title').textContent='New PIN';rdots()}else perr('Incorrect PIN');return}
+  if(pm==='change-new'){npt=pb2;pb2='';pm='change-confirm';document.getElementById('pin-title').textContent='Confirm new PIN';rdots();return}
+  if(pm==='change-confirm'){if(pb2===npt){setP(pb2);unlockApp();toast('✓ PIN changed')}else{perr('PINs do not match');pm='change-new';npt='';document.getElementById('pin-title').textContent='New PIN'}return}
+  if(pb2===getP()){att=0;unlockApp()}
+  else{att++;const r=MA-att;if(att>=MA){lu=Date.now()+30000;perr('Too many attempts. Locked 30s.');att=0;setTimeout(()=>document.getElementById('pin-err').textContent='',30000)}else perr('Incorrect. '+r+' attempt'+(r===1?'':'s')+' left')}
 }
+function perr(m){pb2='';rdots();document.getElementById('pin-err').textContent=m;for(let i=0;i<4;i++)document.getElementById('d'+i).classList.add('error');setTimeout(()=>{for(let i=0;i<4;i++)document.getElementById('d'+i).classList.remove('error')},500)}
+function unlockApp(){document.getElementById('pin-screen').classList.add('hidden');pb2='';rlt()}
+function lockApp(){clearTimeout(lt);pb2='';pm='unlock';document.getElementById('pin-title').textContent='Enter PIN';document.getElementById('pin-sub').textContent='MOH Inpatient Nutrition Register';document.getElementById('pin-err').textContent='';document.getElementById('pin-change').style.display='block';rdots();document.getElementById('pin-screen').classList.remove('hidden')}
+function rlt(){clearTimeout(lt);lt=setTimeout(lockApp,LT)}
+function startChangePin(){pb2='';pm='change-old';document.getElementById('pin-title').textContent='Enter current PIN';document.getElementById('pin-change').style.display='none';document.getElementById('pin-err').textContent='';rdots()}
+['touchstart','mousedown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(document.getElementById('pin-screen').classList.contains('hidden'))rlt()},{passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!document.getElementById('pin-screen').classList.contains('hidden'))return;if(!document.hidden)lockApp()});
 
-// ── PIN SECURITY ──────────────────────────────────────────
-const PIN_KEY = 'ncr_pin';
-const LOCK_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-const MAX_ATTEMPTS = 5;
-
-let pinBuffer = '';
-let pinMode = 'unlock'; // 'unlock' | 'setup' | 'change-old' | 'change-new' | 'change-confirm'
-let newPinTemp = '';
-let attempts = 0;
-let lockTimer = null;
-let lockedUntil = 0;
-
-function getPin() { return localStorage.getItem(PIN_KEY) || null; }
-function setPin(p) { localStorage.setItem(PIN_KEY, p); }
-
-function initPin() {
-  if (!getPin()) {
-    pinMode = 'setup';
-    document.getElementById('pin-title').textContent = 'Create your PIN';
-    document.getElementById('pin-sub').textContent = 'Choose a 4-digit PIN to protect patient data';
-    document.getElementById('pin-change-link').style.display = 'none';
-  } else {
-    pinMode = 'unlock';
-    document.getElementById('pin-title').textContent = 'Enter PIN';
-    document.getElementById('pin-sub').textContent = 'MOH Inpatient Nutrition Register';
-    document.getElementById('pin-change-link').style.display = 'block';
-  }
-  document.getElementById('pin-screen').classList.remove('hidden');
-  pinBuffer = '';
-  renderDots();
-}
-
-function renderDots() {
-  for (let i = 0; i < 4; i++) {
-    const d = document.getElementById('d' + i);
-    d.classList.remove('filled', 'error');
-    if (i < pinBuffer.length) d.classList.add('filled');
-  }
-}
-
-function pinKey(k) {
-  if (Date.now() < lockedUntil) return;
-  if (pinBuffer.length >= 4) return;
-  pinBuffer += k;
-  renderDots();
-  document.getElementById('pin-error').textContent = '';
-  if (pinBuffer.length === 4) setTimeout(handlePin, 120);
-}
-
-function pinDel() {
-  pinBuffer = pinBuffer.slice(0, -1);
-  renderDots();
-}
-
-function handlePin() {
-  if (pinMode === 'setup') {
-    newPinTemp = pinBuffer;
-    pinBuffer = '';
-    pinMode = 'setup-confirm';
-    document.getElementById('pin-title').textContent = 'Confirm PIN';
-    document.getElementById('pin-sub').textContent = 'Enter the same PIN again';
-    renderDots();
-    return;
-  }
-  if (pinMode === 'setup-confirm') {
-    if (pinBuffer === newPinTemp) {
-      setPin(pinBuffer);
-      unlockApp();
-      toast('✓ PIN set successfully');
-    } else {
-      showPinError('PINs do not match. Try again.');
-      pinMode = 'setup';
-      newPinTemp = '';
-      document.getElementById('pin-title').textContent = 'Create your PIN';
-      document.getElementById('pin-sub').textContent = 'Choose a 4-digit PIN to protect patient data';
-    }
-    return;
-  }
-  if (pinMode === 'change-old') {
-    if (pinBuffer === getPin()) {
-      pinBuffer = '';
-      pinMode = 'change-new';
-      document.getElementById('pin-title').textContent = 'New PIN';
-      document.getElementById('pin-sub').textContent = 'Choose your new 4-digit PIN';
-      renderDots();
-    } else {
-      showPinError('Incorrect PIN.');
-    }
-    return;
-  }
-  if (pinMode === 'change-new') {
-    newPinTemp = pinBuffer;
-    pinBuffer = '';
-    pinMode = 'change-confirm';
-    document.getElementById('pin-title').textContent = 'Confirm new PIN';
-    document.getElementById('pin-sub').textContent = 'Enter the new PIN again';
-    renderDots();
-    return;
-  }
-  if (pinMode === 'change-confirm') {
-    if (pinBuffer === newPinTemp) {
-      setPin(pinBuffer);
-      unlockApp();
-      toast('✓ PIN changed successfully');
-    } else {
-      showPinError('PINs do not match. Try again.');
-      pinMode = 'change-new';
-      newPinTemp = '';
-      document.getElementById('pin-title').textContent = 'New PIN';
-      document.getElementById('pin-sub').textContent = 'Choose your new 4-digit PIN';
-    }
-    return;
-  }
-  // unlock mode
-  if (pinBuffer === getPin()) {
-    attempts = 0;
-    document.getElementById('pin-attempts').textContent = '';
-    unlockApp();
-  } else {
-    attempts++;
-    const remaining = MAX_ATTEMPTS - attempts;
-    if (attempts >= MAX_ATTEMPTS) {
-      lockedUntil = Date.now() + 30000;
-      showPinError('Too many attempts. Locked for 30 seconds.');
-      attempts = 0;
-      setTimeout(() => {
-        document.getElementById('pin-error').textContent = '';
-        document.getElementById('pin-attempts').textContent = '';
-      }, 30000);
-    } else {
-      showPinError('Incorrect PIN. ' + remaining + ' attempt' + (remaining === 1 ? '' : 's') + ' left.');
-    }
-  }
-}
-
-function showPinError(msg) {
-  pinBuffer = '';
-  renderDots();
-  document.getElementById('pin-error').textContent = msg;
-  for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.add('error');
-  setTimeout(() => { for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.remove('error'); }, 500);
-}
-
-function unlockApp() {
-  document.getElementById('pin-screen').classList.add('hidden');
-  pinBuffer = '';
-  resetLockTimer();
-}
-
-function lockApp() {
-  clearTimeout(lockTimer);
-  pinBuffer = '';
-  pinMode = 'unlock';
-  document.getElementById('pin-title').textContent = 'Enter PIN';
-  document.getElementById('pin-sub').textContent = 'MOH Inpatient Nutrition Register';
-  document.getElementById('pin-error').textContent = '';
-  document.getElementById('pin-change-link').style.display = 'block';
-  renderDots();
-  document.getElementById('pin-screen').classList.remove('hidden');
-}
-
-function resetLockTimer() {
-  clearTimeout(lockTimer);
-  lockTimer = setTimeout(lockApp, LOCK_TIMEOUT);
-}
-
-function startChangePin() {
-  pinBuffer = '';
-  pinMode = 'change-old';
-  document.getElementById('pin-title').textContent = 'Enter current PIN';
-  document.getElementById('pin-sub').textContent = 'Verify your identity to change PIN';
-  document.getElementById('pin-change-link').style.display = 'none';
-  document.getElementById('pin-error').textContent = '';
-  renderDots();
-}
-
-// Reset timer on any user interaction
-['touchstart','mousedown','keydown'].forEach(ev =>
-  document.addEventListener(ev, () => { if (document.getElementById('pin-screen').classList.contains('hidden')) resetLockTimer(); }, { passive: true })
-);
-
-// Lock when app goes to background
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    clearTimeout(lockTimer);
-  } else {
-    if (!document.getElementById('pin-screen').classList.contains('hidden')) return;
-    // re-lock if was hidden for more than 1 min
-    lockApp();
-  }
-});
-
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadData();updateDash();updConn();
+document.getElementById('a-date').value=new Date().toISOString().slice(0,10);
+document.getElementById('e-date').value=new Date().toISOString().slice(0,10);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 initPin();
 </script>
-
-<!-- PIN LOCK SCREEN -->
-<div class="pin-screen" id="pin-screen">
-  <div class="pin-logo">
-    <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-      <rect x="3" y="11" width="18" height="11" rx="2"/>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-    </svg>
-  </div>
-  <div class="pin-title" id="pin-title">Enter PIN</div>
-  <div class="pin-sub" id="pin-sub">MOH Inpatient Nutrition Register</div>
-  <div class="pin-dots" id="pin-dots">
-    <div class="pin-dot" id="d0"></div>
-    <div class="pin-dot" id="d1"></div>
-    <div class="pin-dot" id="d2"></div>
-    <div class="pin-dot" id="d3"></div>
-  </div>
-  <div class="pin-keypad">
-    <button class="pin-key" onclick="pinKey('1')">1</button>
-    <button class="pin-key" onclick="pinKey('2')">2</button>
-    <button class="pin-key" onclick="pinKey('3')">3</button>
-    <button class="pin-key" onclick="pinKey('4')">4</button>
-    <button class="pin-key" onclick="pinKey('5')">5</button>
-    <button class="pin-key" onclick="pinKey('6')">6</button>
-    <button class="pin-key" onclick="pinKey('7')">7</button>
-    <button class="pin-key" onclick="pinKey('8')">8</button>
-    <button class="pin-key" onclick="pinKey('9')">9</button>
-    <button class="pin-key empty"></button>
-    <button class="pin-key" onclick="pinKey('0')">0</button>
-    <button class="pin-key del" onclick="pinDel()">⌫</button>
-  </div>
-  <div class="pin-error-msg" id="pin-error"></div>
-  <div class="pin-attempts" id="pin-attempts"></div>
-  <button class="pin-change-link" id="pin-change-link" onclick="startChangePin()" style="display:none;">Change PIN</button>
-</div>
-
-<!-- PATIENT DETAIL MODAL -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal-sheet" id="modal-content"></div>
-</div>
-
 </body>
 </html>
