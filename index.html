@@ -338,7 +338,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <!-- WEIGHT GAIN -->
     <div class="card">
       <div class="ctitle">Weight gain analysis</div>
-      <div id="wg-area"><div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see weight gain analysis</p></div></div>
+      <div class="ibox" style="margin-bottom:8px;font-size:11px">Weight gain is only meaningful when child is on <strong>F-100 or RUTF</strong>. On F-75, weight loss is normal (oedema resolving).</div>
+      <div id="wg-area"><div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see analysis</p></div></div>
+    </div>
+    <!-- WEIGHT TREND -->
+    <div class="card">
+      <div class="ctitle">Weight trend (kg over days)</div>
+      <div id="wt-trend"><div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see trend</p></div></div>
     </div>
 
     <!-- TRANSITION CRITERIA -->
@@ -913,7 +919,7 @@ function renderDayForm(p,d){
     </div>
 
     <div class="sh">Day ${d} — Feeding</div>
-    ${isUnder6?'<div class="wbox" style="margin-bottom:10px">⚠ Under 6 months: Expressed breast milk first, then diluted F-100 or F-75. Do NOT give full-strength F-100.</div>':''}
+    ${isUnder6?'<div class="wbox" style="margin-bottom:10px"><strong>Infant &lt;6 months protocol:</strong><br>1. If mother can express: measure expressed milk → feed it → top up deficit with diluted F-100 or formula<br>2. No breastmilk: diluted F-100 (no oedema) or F-75 (oedema present)<br>3. NEVER full-strength F-100 — hypernatremia risk<br>4. NG tube max 3 days (stabilisation only)<br>5. RUTF is NOT used in &lt;6 months</div>':''}
     <div class="fr">
       <div class="fg"><label>Therapeutic feed</label>
         <select id="m-feed" onchange="autoSaveMon()">
@@ -931,10 +937,12 @@ function renderDayForm(p,d){
             <option value="RUTF" ${m.feed==='RUTF'?'selected':''}>RUTF (Plumpy'nut / BP-100)</option>
           </optgroup>
           <optgroup label="Infants <6 months">
-            <option value="Diluted F-100" ${m.feed==='Diluted F-100'?'selected':''}>Diluted F-100 (add 35ml water per 100ml)</option>
+            <option value="Diluted F-100" ${m.feed==='Diluted F-100'?'selected':''}>Diluted F-100 (add 30% extra water to reconstituted F-100)</option>
             <option value="F-75 (<6 months)" ${m.feed==='F-75 (<6 months)'?'selected':''}>F-75 (&lt;6 months)</option>
             <option value="Breast milk" ${m.feed==='Breast milk'?'selected':''}>Breast milk only</option>
-            <option value="Breast milk + Diluted F-100" ${m.feed==='Breast milk + Diluted F-100'?'selected':''}>Breast milk + Diluted F-100</option>
+            <option value="Breast milk + Diluted F-100" ${m.feed==='Breast milk + Diluted F-100'?'selected':''}>Expressed breast milk + Diluted F-100 (top-up)</option>
+            <option value="Infant formula" ${m.feed==='Infant formula'?'selected':''}>Infant formula (commercial generic)</option>
+            <option value="Breast milk + Formula" ${m.feed==='Breast milk + Formula'?'selected':''}>Expressed breast milk + Formula (top-up)</option>
           </optgroup>
         </select>
       </div>
@@ -1020,18 +1028,58 @@ ${f?`• Give <strong>${f[1]} ml</strong> IV over 2 hours<br>• Drip rate: <str
 • Then switch to 2-hourly F-75 feeds normally<br><br>
 <em style="font-size:11px">⚠ Stop ReSoMal if: respiratory rate ↑5/min, pulse ↑25/min, liver enlarges, crackles, engorgement of veins, gallop rhythm, increasing oedema</em>`;
   } else if(v==='Dehydration'){
-    el.innerHTML=`<strong style="color:var(--or)">Dehydration (NO shock) — ReSoMal oral/NG plan</strong><br>
-<strong>First 2 hours — every 30 minutes:</strong><br>
-• Give <strong>5 ml/kg ReSoMal</strong> every 30 min = <strong>${r5} ml</strong> per dose (${wt?Math.round(r5*4):''} ml total)<br><br>
-<strong>Next up to 10 hours — alternating hourly:</strong><br>
-• Hour 1: ReSoMal <strong>${r75} ml</strong> (7.5 ml/kg)<br>
-• Hour 2: F-75 (see F-75 calculator for amount)<br>
-• Continue alternating ReSoMal/F-75 for up to 10 hours<br>
-• ReSoMal can be adjusted 5–10 ml/kg/hr based on child's willingness<br><br>
-<strong>After 10 hours if still passing loose stools:</strong><br>
-• Give ReSoMal <strong>${r10} ml</strong> (10 ml/kg) after each loose stool<br><br>
-<em style="font-size:11px">⚠ Do NOT give IV fluids — only oral/NG ReSoMal for dehydration without shock<br>
-⚠ Stop if overhydration signs appear (same as shock protocol above)</em>`;
+    // Per guideline: First 2hrs = ReSoMal 5ml/kg every 30min (4 doses)
+    // Then 10 hrs alternating ReSoMal/F-75 both at 7.5ml/kg = 10 rows
+    // Total = 2hrs + 10hrs = 12hrs, 14 rows
+    let rows='';
+    // First 2 hours — 4 doses of ReSoMal 5ml/kg every 30 min
+    const first2=[
+      ['1st hr — 1st 30min','ReSoMal',r5,'5ml/kg every 30 min'],
+      ['1st hr — 2nd 30min','ReSoMal',r5,''],
+      ['2nd hr — 1st 30min','ReSoMal',r5,'5ml/kg every 30 min'],
+      ['2nd hr — 2nd 30min','ReSoMal',r5,''],
+    ];
+    first2.forEach(([hr,feed,ml,note])=>{
+      rows+=`<tr style="background:#fff8e1"><td style="padding:5px 8px;font-size:11px;font-weight:500">${hr}</td><td style="padding:5px 8px;font-size:11px;color:var(--or);font-weight:700">ReSoMal</td><td style="padding:5px 8px;font-size:12px;font-weight:700">${ml} ml</td><td style="padding:5px 8px;font-size:10px;color:var(--tm)">${note}</td></tr>`;
+    });
+    // Hours 3–12 — 10 hours alternating, both at 7.5ml/kg
+    const alt10=[
+      ['3rd hr','ReSoMal'],['4th hr','F-75'],
+      ['5th hr','ReSoMal'],['6th hr','F-75'],
+      ['7th hr','ReSoMal'],['8th hr','F-75'],
+      ['9th hr','ReSoMal'],['10th hr','F-75'],
+      ['11th hr','ReSoMal'],['12th hr','F-75'],
+    ];
+    alt10.forEach(([hr,feed])=>{
+      const isRes=feed==='ReSoMal';
+      const bg=isRes?'#e8f5e9':'#e3f2fd';
+      const col=isRes?'var(--gd)':'var(--bl)';
+      const note=isRes?'7.5ml/kg (can adjust 5–10ml/kg as tolerated)':'7.5ml/kg';
+      rows+=`<tr style="background:${bg}"><td style="padding:5px 8px;font-size:11px;font-weight:500">${hr}</td><td style="padding:5px 8px;font-size:11px;color:${col};font-weight:700">${feed}</td><td style="padding:5px 8px;font-size:12px;font-weight:700">${r75} ml</td><td style="padding:5px 8px;font-size:10px;color:var(--tm)">${note}</td></tr>`;
+    });
+    el.innerHTML=`
+<div style="font-weight:600;color:var(--or);font-size:13px;margin-bottom:8px">
+  12-hour plan — ${wt||'?'} kg &nbsp;|&nbsp; ReSoMal + F-75
+</div>
+<div style="font-size:11px;background:var(--gp);border-radius:var(--r);padding:8px 10px;margin-bottom:8px;line-height:1.6">
+  <strong>First 2 hours:</strong> ReSoMal <strong>${r5} ml</strong> (5ml/kg) every 30 min — 4 doses<br>
+  <strong>Hours 3–12:</strong> Alternate ReSoMal and F-75 — both <strong>${r75} ml</strong> (7.5ml/kg) every hour
+</div>
+<table style="width:100%;border-collapse:collapse">
+  <tr style="background:var(--gd);color:white">
+    <th style="padding:6px 8px;font-size:11px;text-align:left">Hour</th>
+    <th style="padding:6px 8px;font-size:11px;text-align:left">Give</th>
+    <th style="padding:6px 8px;font-size:11px;text-align:left">Amount</th>
+    <th style="padding:6px 8px;font-size:11px;text-align:left">Note</th>
+  </tr>
+  ${rows}
+</table>
+<div style="font-size:11px;color:var(--tm);margin-top:8px;line-height:1.7">
+  ✓ After 12 hours: switch to regular 3-hourly F-75<br>
+  ✓ If still loose stools after 12hrs: ReSoMal <strong>${r10} ml</strong> (10ml/kg) after each stool<br>
+  ⚠ Do NOT give IV fluids — oral/NG only<br>
+  🛑 STOP if: ↑RR ≥5/min, ↑pulse ≥25/min, liver enlarges, crackles, oedema worsens
+</div>`;
   } else {
     el.innerHTML='<strong>Monitoring only</strong> — observe for signs of dehydration or improvement';
   }
@@ -1091,7 +1139,58 @@ function renderWG(p){
     <div class="dr"><span class="dk">Weight</span><span class="dv">${wg.fw} kg → ${wg.lw} kg</span></div>
     <div class="dr"><span class="dk">Total change</span><span class="dv ${r>=0?'wgg':'wgr'}">${wg.wg>0?'+':''}${wg.wg} kg</span></div>
     <div class="dr"><span class="dk">Rate g/kg/day</span><span class="dv"><span class="${wgClass(r)}">${wg.rate} — ${wgLabel(r)}</span></span></div>
-    <div class="dr" style="border:none;margin-top:4px"><span style="font-size:11px;color:var(--tm)">Phase 2 target: ≥10 g/kg/day. Failure to respond: &lt;5 g/kg/day for 2 consecutive weeks.</span></div>`;
+    <div class="dr" style="border:none;margin-top:4px"><span style="font-size:11px;color:var(--tm)">
+      <strong>Note:</strong> Weight gain is only calculated when child is on <strong>F-100 or RUTF</strong> (not F-75 — weight loss on F-75 is normal due to resolving oedema).<br>
+      Good: ≥10 g/kg/day · Moderate: 5–9 g/kg/day · Poor: &lt;5 g/kg/day
+    </span></div>`;
+  renderWeightTrend(p);
+}
+
+// ─── WEIGHT TREND CHART ──────────────────────────────────────────────────────
+function renderWeightTrend(p){
+  const el=document.getElementById('wt-trend');if(!el)return;
+  const days=Object.keys(p.monitoring||{}).map(Number).sort((a,b)=>a-b);
+  const pts=days.map(d=>{const m=p.monitoring[d];return{day:d,wt:parseFloat(m.wt)||null,muac:parseFloat(m.muac)||null,feed:m.feed||''}}).filter(x=>x.wt);
+  if(pts.length<2){el.innerHTML='<div class="empty"><p style="font-size:12px">Enter weight on at least 2 days to see trend chart</p></div>';return}
+  const maxWt=Math.max(...pts.map(x=>x.wt));
+  const minWt=Math.min(...pts.map(x=>x.wt));
+  const range=maxWt-minWt||0.5;
+  const W=300,H=120,pad=30;
+  const xScale=(W-pad*2)/(pts.length-1||1);
+  const yScale=(H-pad*1.5)/range;
+  const toX=(i)=>pad+i*xScale;
+  const toY=(w)=>H-pad/2-(w-minWt)*yScale;
+  // Draw points and lines
+  let path='';let dots='';let labels='';
+  pts.forEach((p2,i)=>{
+    const x=toX(i);const y=toY(p2.wt);
+    if(i===0)path+=`M${x},${y}`;else path+=` L${x},${y}`;
+    const isF100=p2.feed.includes('F-100')||p2.feed.includes('RUTF');
+    const col=isF100?'var(--gl)':'var(--or)';
+    dots+=`<circle cx="${x}" cy="${y}" r="4" fill="${col}" stroke="white" stroke-width="1.5"><title>Day ${p2.day}: ${p2.wt}kg</title></circle>`;
+    if(i===0||i===pts.length-1||i%3===0){
+      labels+=`<text x="${x}" y="${H+8}" text-anchor="middle" font-size="9" fill="var(--tm)">D${p2.day}</text>`;
+      labels+=`<text x="${x}" y="${y-8}" text-anchor="middle" font-size="9" fill="${col}">${p2.wt}</text>`;
+    }
+  });
+  // Y axis labels
+  const yLabels=`<text x="${pad-4}" y="${toY(minWt)+4}" text-anchor="end" font-size="9" fill="var(--tm)">${minWt.toFixed(1)}</text>
+    <text x="${pad-4}" y="${toY(maxWt)+4}" text-anchor="end" font-size="9" fill="var(--tm)">${maxWt.toFixed(1)}</text>`;
+  const adm=parseFloat(p.weight)||0;
+  const admLine=adm>=minWt&&adm<=maxWt?`<line x1="${pad}" y1="${toY(adm)}" x2="${W-pad}" y2="${toY(adm)}" stroke="#bbb" stroke-dasharray="3,3" stroke-width="1"/><text x="${W-pad+2}" y="${toY(adm)+4}" font-size="8" fill="#999">Adm</text>`:'';
+  el.innerHTML=`
+    <svg viewBox="0 0 ${W} ${H+20}" width="100%" style="overflow:visible">
+      <line x1="${pad}" y1="${pad/2}" x2="${pad}" y2="${H-pad/2+8}" stroke="var(--br)" stroke-width="1"/>
+      <line x1="${pad}" y1="${H-pad/2+8}" x2="${W-pad}" y2="${H-pad/2+8}" stroke="var(--br)" stroke-width="1"/>
+      ${admLine}
+      <path d="${path}" fill="none" stroke="var(--gl)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}${labels}${yLabels}
+    </svg>
+    <div style="font-size:10px;color:var(--tm);margin-top:4px;display:flex;gap:12px">
+      <span><span style="color:var(--gl)">●</span> F-100/RUTF days</span>
+      <span><span style="color:var(--or)">●</span> F-75/other days</span>
+      <span style="color:#999">--- Admission weight</span>
+    </div>`;
 }
 
 // ─── CALCULATORS ─────────────────────────────────────────────────────────────
@@ -1118,7 +1217,7 @@ function renderF75Calc(el,wKg,oedema){
   if(!r){el.innerHTML='<div class="ibox">Weight out of range for F-75 reference card.</div>';return}
   el.innerHTML=`
     <div class="gbox">Using <strong>${severe?'Severe (+++) oedema':'Normal (0/+/++) oedema'}</strong> F-75 table for ${wKg} kg</div>
-    ${isUnder6?'<div class="wbox">Under 6 months: Use diluted F-100 or F-75. Not full-strength F-100.</div>':''}
+    ${isUnder6?'<div class="wbox"><strong>Expressed breast milk + top-up:</strong> Measure how much mother expresses → feed all of it → calculate deficit (target ml minus expressed ml) → top up deficit with diluted F-100 or formula. See F-100 calculator for amounts by weight.</div>':''}
     <div class="calc-box">
       <div class="calc-title">F-75 amounts per feed (130 ml/kg/day = 100 kcal/kg/day)</div>
       <div class="calc-row"><span>2-hourly (12 feeds/day) — Day 1</span><span><strong>${r[0]} ml</strong></span></div>
@@ -1135,23 +1234,54 @@ function renderF75Calc(el,wKg,oedema){
     </div>`;
 }
 
+// Diluted F-100 table (Table 6.3) — 8 feeds/day
+// [weight range label, wt_min, wt_max, phase1_ml, transition_ml, phase2_ml]
+const DILF100=[
+  ['1.5 kg',1.5,1.5,30,40,60],
+  ['1.6–1.7 kg',1.6,1.7,35,45,70],
+  ['1.8–2.1 kg',1.8,2.1,40,50,80],
+  ['2.2–2.4 kg',2.2,2.4,45,60,90],
+  ['2.5–2.7 kg',2.5,2.7,50,65,100],
+  ['2.8–2.9 kg',2.8,2.9,55,70,110],
+  ['3.0–3.4 kg',3.0,3.4,60,80,120],
+  ['3.5–3.9 kg',3.5,3.9,65,85,130],
+  ['4.0–4.4 kg',4.0,4.4,70,90,140],
+];
+function getDilF100(wKg){return DILF100.find(r=>wKg>=r[1]&&wKg<=r[2])||null}
+
 function renderF100Calc(el,wKg){
   if(!wKg){el.innerHTML='<div class="ibox">Weight required to calculate F-100 amounts.</div>';return}
   const r=getF100(wKg);
-  if(!r){el.innerHTML='<div class="ibox">Unable to calculate.</div>';return}
+  const dr=getDilF100(wKg);
   el.innerHTML=`
-    <div class="calc-box">
-      <div class="calc-title">F-100 free feeding — Phase 2 (6 feeds/day, 4-hourly)</div>
-      <div class="calc-row"><span>Min per feed (150 kcal/kg/day)</span><span><strong>${r[0]} ml</strong></span></div>
-      <div class="calc-row"><span>Max per feed (220 kcal/kg/day)</span><span><strong>${r[1]} ml</strong></span></div>
-      <div class="calc-row"><span>Daily minimum</span><span><strong>${Math.round(r[2])} ml</strong></span></div>
-      <div class="calc-row"><span>Daily maximum</span><span><strong>${Math.round(r[3])} ml</strong></span></div>
+    <div class="calc-box" style="margin-bottom:8px">
+      <div class="calc-title">F-100 — Phase 2 free feeding (6 feeds/day, 4-hourly) for ${wKg}kg</div>
+      <div class="calc-row"><span>Min per feed (150 kcal/kg/day)</span><span><strong>${r?r[0]:'—'} ml</strong></span></div>
+      <div class="calc-row"><span>Max per feed (220 kcal/kg/day)</span><span><strong>${r?r[1]:'—'} ml</strong></span></div>
+      <div class="calc-row"><span>Daily minimum</span><span><strong>${r?Math.round(r[2]):'—'} ml</strong></span></div>
+      <div class="calc-row"><span>Daily maximum</span><span><strong>${r?Math.round(r[3]):'—'} ml</strong></span></div>
     </div>
-    <div class="ibox" style="margin-top:8px">
-      Feed freely — offer as much as child wants within range.<br>
-      If still hungry after completing feed, offer more (up to max).<br>
-      Increase each feed by 10 ml if finishing all feeds.<br>
-      <strong>RUTF equivalent:</strong> 100 ml F-100 ≈ 20g RUTF (1 sachet = 500 ml F-100)
+    <div class="calc-box" style="margin-bottom:8px;background:#fff8e1;border-color:#ffe082">
+      <div class="calc-title" style="color:#b5850a">Diluted F-100 — Infants &lt;6 months (8 feeds/day)${dr?' for '+dr[0]:''}  </div>
+      ${dr?`
+      <div class="calc-row"><span>Phase 1 — Stabilisation (100 kcal/kg/day)</span><span><strong>${dr[3]} ml/feed</strong></span></div>
+      <div class="calc-row"><span>Transition (110–130 kcal/kg/day)</span><span><strong>${dr[4]} ml/feed</strong></span></div>
+      <div class="calc-row"><span>Phase 2 — Rehabilitation (150 kcal/kg/day)</span><span><strong>${dr[5]} ml/feed</strong></span></div>
+      <div class="calc-row"><span>Daily total Phase 1</span><span><strong>${dr[3]*8} ml/day</strong></span></div>
+      <div class="calc-row"><span>Daily total Phase 2</span><span><strong>${dr[5]*8} ml/day</strong></span></div>`:'<div style="font-size:12px">Weight below 1.5kg — use clinical judgment</div>'}
+      <div style="margin-top:8px;font-size:11px;color:#b5850a;border-top:1px solid #ffe082;padding-top:6px">
+        <strong>How to prepare diluted F-100:</strong><br>
+        1. Reconstitute F-100 normally (2 scoops + 50ml water = 50ml F-100)<br>
+        2. Add <strong>30% extra water</strong> to the reconstituted F-100<br>
+        &nbsp;&nbsp;&nbsp;e.g. for 50ml F-100 → add 15ml water more → gives ~65ml diluted F-100<br>
+        3. Measure out required amount and feed within 2 hours — discard remainder<br>
+        ⚠ NEVER give full-strength F-100 to infants &lt;6 months (risk of hypernatremia)
+      </div>
+    </div>
+    <div class="ibox">
+      F-100 feed freely — offer as much as child wants within range.<br>
+      Increase each feed by 10ml if child finishes all feeds consistently.<br>
+      <strong>RUTF equivalent:</strong> 100ml F-100 ≈ 20g RUTF (1 sachet Plumpy'nut = ~500ml F-100)
     </div>`;
 }
 
